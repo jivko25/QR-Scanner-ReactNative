@@ -2,6 +2,8 @@ import React, { useEffect, useState } from 'react';
 import { View, Text, Button, StyleSheet, ActivityIndicator } from 'react-native';
 import { useAuth } from '../storage/authContext';
 import { useBudgets } from '../storage/budgetsContext';
+import LottieView from 'lottie-react-native';
+import loadingAnimation from '../assets/loading-animation.json';
 
 export default function HomeScreen({ navigation }) {
     const { session, loadSessionFromStorage, clearSession, loading, error } = useAuth();
@@ -31,10 +33,14 @@ export default function HomeScreen({ navigation }) {
     // Ако още зареждаме сесията (от AsyncStorage или бекенд)
     if (loadingBudgets || loading) {
         return (
-            <View style={styles.container}>
-                <ActivityIndicator size="large" color="#000" />
-                <Text>{session?.refresh_token || 'no'}</Text>
-                <Text style={{ marginTop: 20, fontSize: 16 }}>Зареждане...</Text>
+            <View style={styles.loadingContainer}>
+                <LottieView
+                    source={loadingAnimation}
+                    autoPlay
+                    loop
+                    style={{ width: 200, height: 200 }}
+                />
+                <Text style={styles.loadingText}>Loading...</Text>
             </View>
         );
     }
@@ -78,5 +84,16 @@ const styles = StyleSheet.create({
         fontSize: 24,
         textAlign: 'center',
         marginBottom: 40,
+    },
+    loadingContainer: {
+        flex: 1,
+        justifyContent: 'center',
+        alignItems: 'center',
+        backgroundColor: '#f5f5f5',
+    },
+    loadingText: {
+        marginTop: 20,
+        fontSize: 16,
+        color: '#333',
     },
 });
