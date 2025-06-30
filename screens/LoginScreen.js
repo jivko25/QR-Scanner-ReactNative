@@ -1,31 +1,46 @@
 import React, { useState } from 'react';
-import { View, Text, TextInput, Button, StyleSheet, Alert } from 'react-native';
+import { View, Text, TextInput, Button, StyleSheet, Alert, ActivityIndicator } from 'react-native';
 import axios from 'axios';
-import { saveSession } from '../utils/auth';
 import { BASE_URL } from '../utils/api';
+import { saveSession } from '../utils/auth';
+import { useBudgets } from '../storage/budgetsContext';
+import { useAuth } from '../storage/authContext';
 
 export default function LoginScreen({ navigation }) {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+  const [loading, setLoading] = useState(false);
+  const { fetchBudgets } = useBudgets();
+  const { saveSession } = useAuth();
 
   const handleLogin = async () => {
     try {
+      setLoading(true)
       const res = await axios.post(`${BASE_URL}/auth/login`, {
         email,
         password,
       });
 
+      setLoading(false)
+
       const token = res.data.session.access_token;
+      const refresh_token = res.data.session.refresh_token;
       const user = res.data.session.user;
 
-      await saveSession(token, email, user);
+      saveSession(token, email, user, refresh_token);
+      // fetchBudgets();
 
       navigation.replace('Home');
     } catch (err) {
+      setLoading(false)
       console.error(err);
       Alert.alert('Грешка при вход', err.response?.data?.error || 'Проблем със сървъра');
     }
   };
+
+      if (loading) {
+        return <ActivityIndicator style={{ marginTop: 40 }} />;
+    }
 
   return (
     <View style={styles.container}>
@@ -45,6 +60,7 @@ export default function LoginScreen({ navigation }) {
         onChangeText={setPassword}
         secureTextEntry
       />
+      
 
       <Button title="Вход" onPress={handleLogin} />
       <Text style={styles.link} onPress={() => navigation.navigate('Register')}>

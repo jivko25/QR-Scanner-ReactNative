@@ -1,10 +1,12 @@
 import React, { useState } from 'react';
 import { View, Text, TextInput, Button, Alert, StyleSheet } from 'react-native';
 import api from '../utils/api';
+import { useBudgets } from '../storage/budgetsContext';
 
 export default function BudgetJoinScreen({ navigation }) {
   const [inviteCode, setInviteCode] = useState('');
   const [displayName, setDisplayName] = useState('');
+  const { fetchBudgets } = useBudgets();
 
   const handleJoin = async () => {
     if (!inviteCode.trim()) {
@@ -19,6 +21,9 @@ export default function BudgetJoinScreen({ navigation }) {
     } catch (err) {
       const msg = err.response?.data?.error || 'Проблем при присъединяване';
       Alert.alert('Грешка', err);
+    }
+    finally {
+      fetchBudgets()
     }
   };
 

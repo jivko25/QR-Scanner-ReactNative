@@ -2,29 +2,31 @@ import React, { useEffect, useState } from 'react';
 import { View, Text, Button, ScrollView, ActivityIndicator, StyleSheet, TouchableOpacity } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import api from '../utils/api';
+import { useBudgets } from '../storage/budgetsContext';
 
 export default function BudgetsScreen({ navigation }) {
-    const [budgets, setBudgets] = useState([]);
-    const [loading, setLoading] = useState(true);
+    // const [budgets, setBudgets] = useState([]);
+    // const [loading, setLoading] = useState(true);
+    const { budgets } = useBudgets();
 
     useEffect(() => {
-        const fetchBudgets = async () => {
-            try {
-                const res = await api.get('/budget');
-                setBudgets(res.data.budgets);
-            } catch (err) {
-                console.error('Грешка при зареждане на бюджети:', err);
-            } finally {
-                setLoading(false);
-            }
-        };
+        // const fetchBudgets = async () => {
+        //     try {
+        //         const res = await api.get('/budget');
+        //         setBudgets(res.data.budgets);
+        //     } catch (err) {
+        //         console.error('Грешка при зареждане на бюджети:', err);
+        //     } finally {
+        //         setLoading(false);
+        //     }
+        // };
 
-        fetchBudgets();
+        // fetchBudgets();
     }, []);
 
-    if (loading) {
-        return <ActivityIndicator style={{ marginTop: 40 }} />;
-    }
+    // if (loading) {
+    //     return <ActivityIndicator style={{ marginTop: 40 }} />;
+    // }
 
     return (
         <>

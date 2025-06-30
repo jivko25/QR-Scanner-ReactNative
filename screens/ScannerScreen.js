@@ -3,7 +3,8 @@ import { View, Text, Button, StyleSheet, TouchableOpacity, Alert, Modal, Activit
 import { CameraView, useCameraPermissions } from 'expo-camera';
 import { Picker } from '@react-native-picker/picker'; // Ще трябва да инсталирате този пакет
 import api from '../utils/api'; // Предполагам, че api.js вече е настроен правилно за вашите заявки
-import { getSession } from '../utils/auth';
+import { useBudgets } from '../storage/budgetsContext';
+import { useAuth } from '../storage/authContext';
 
 // Константни стойности - може да ги направите динамични ако е необходимо
 const SCANNED_BY = '71271b35-dcce-4122-bf0e-1055cbeaf551'; // Примерно ID на потребител
@@ -14,30 +15,12 @@ export default function ScannerScreen({ navigation }) {
   const [scannedData, setScannedData] = useState(null);
   const [showCamera, setShowCamera] = useState(true);
   const [modalVisible, setModalVisible] = useState(false); // За управление на видимостта на модала
-  const [budgets, setBudgets] = useState([]); // За съхранение на бюджетите
+  const { budgets } = useBudgets();
+  const { getSession } = useAuth();
+
   const [selectedBudget, setSelectedBudget] = useState(null); // За избрания бюджет
-  const [loadingBudgets, setLoadingBudgets] = useState(true); // За зареждане на бюджети
   const [isSendingScan, setIsSendingScan] = useState(false); // За избягване на дублирани изпращания
 
-  // Извличане на бюджети при зареждане на компонента
-  useEffect(() => {
-    const fetchBudgets = async () => {
-      try {
-        setLoadingBudgets(true);
-        const response = await api.get('/budget'); // Уверете се, че този endpoint връща списък с бюджети
-        setBudgets(response.data.budgets);
-        if (response.data.length > 0) {
-          setSelectedBudget(response.data[0].id); // Избираме първия бюджет по подразбиране
-        }
-      } catch (error) {
-        console.error('Грешка при извличане на бюджети:', error);
-        Alert.alert('Грешка', 'Не успяхме да заредим бюджетите. Моля, опитайте отново.');
-      } finally {
-        setLoadingBudgets(false);
-      }
-    };
-    fetchBudgets();
-  }, []);
 
   if (!permission) {
     return <View style={styles.centered} />;
@@ -76,7 +59,7 @@ export default function ScannerScreen({ navigation }) {
 
     setIsSendingScan(true);
     try {
-      const { user } = await getSession()
+      const { user } = getSession()
       const payload = {
         raw_code: scannedData,
         budget_id: selectedBudget, // Използваме избрания бюджет
@@ -142,9 +125,7 @@ export default function ScannerScreen({ navigation }) {
             <Text style={styles.modalTitle}>Избери бюджет за сканираната бележка</Text>
             <Text style={styles.modalScannedData}>Сканиран код: {scannedData}</Text>
 
-            {loadingBudgets ? (
-              <ActivityIndicator size="large" color="#0000ff" />
-            ) : (
+            {
               budgets.length > 0 ? (
                 <Picker
                   selectedValue={selectedBudget}
@@ -158,7 +139,7 @@ export default function ScannerScreen({ navigation }) {
               ) : (
                 <Text style={styles.noBudgetsText}>Няма налични бюджети. Моля, създайте такъв.</Text>
               )
-            )}
+            }
 
             <View style={styles.modalButtons}>
               <Button

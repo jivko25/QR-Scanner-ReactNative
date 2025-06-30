@@ -20,12 +20,13 @@ export const setNavigator = (navigator) => {
 
 // Добавяме интерцептор за всяка заявка, за да слагаме токена
 api.interceptors.request.use(async (config) => {
-  const token = await AsyncStorage.getItem('token');
-
-  if (token) {
-    config.headers.Authorization = `Bearer ${token}`;
+  const sessionStr = await AsyncStorage.getItem('session');
+  if (sessionStr) {
+    const session = JSON.parse(sessionStr);
+    if (session.token) {
+      config.headers.Authorization = `Bearer ${session.token}`;
+    }
   }
-
   return config;
 }, (error) => {
   return Promise.reject(error);

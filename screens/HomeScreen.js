@@ -1,64 +1,66 @@
 import React, { useEffect, useState } from 'react';
-import { View, Text, Button, StyleSheet } from 'react-native';
-import { getSession, clearSession } from '../utils/auth';
+import { View, Text, Button, StyleSheet, ActivityIndicator } from 'react-native';
+import { useAuth } from '../storage/authContext';
+import { useBudgets } from '../storage/budgetsContext';
 
 export default function HomeScreen({ navigation }) {
-    const [displayName, setDisplayName] = useState(null);
+    const { session, loadSessionFromStorage, clearSession, loading, error } = useAuth();
+    const [checkedSession, setCheckedSession] = useState(true);
+    const { fetchBudgets, loading: loadingBudgets, error: errorBudgets } = useBudgets();
 
     useEffect(() => {
-        const loadSession = async () => {
-            const session = await getSession();
-            if (session?.user?.user_metadata?.display_name || session.email) {
-                setDisplayName(session?.user?.user_metadata?.display_name || session.email);
-            }
+        const initialize = async () => {
+          await loadSessionFromStorage(); // независимо дали има session в момента
+          setCheckedSession(true);
         };
+      
+        initialize();
+      }, []);
 
-        const unsubscribe = navigation.addListener('focus', loadSession);
-        return unsubscribe;
-    }, [navigation]);
+    // useEffect(() => {
+    //     if (session?.token && checkedSession) {
+    //       fetchBudgets();
+    //     }
+    //   }, [session?.token, checkedSession]);
 
     const handleLogout = async () => {
         await clearSession();
-        setDisplayName(null);
         navigation.replace('Login');
     };
 
+    // Ако още зареждаме сесията (от AsyncStorage или бекенд)
+    if (loadingBudgets || loading) {
+        return (
+            <View style={styles.container}>
+                <ActivityIndicator size="large" color="#000" />
+                <Text>{session?.refresh_token || 'no'}</Text>
+                <Text style={{ marginTop: 20, fontSize: 16 }}>Зареждане...</Text>
+            </View>
+        );
+    }
+
     return (
         <View style={styles.container}>
+            <Text>{errorBudgets}</Text>
             <Text style={styles.title}>
-                {displayName ? `Здравей, ${displayName}!` : 'Добре дошъл!'}
+                {session?.user?.email ? `Здравей, ${session.user.email}!` : 'Добре дошъл!'}
             </Text>
 
-            {displayName ? (
+            {session?.user ? (
                 <>
-                    <Button
-                        title="Сканирай бележка"
-                        onPress={() => navigation.navigate('Scanner')}
-                    />
+                    <Button title="Сканирай бележка" onPress={() => navigation.navigate('Scanner')} />
                     <View style={{ height: 20 }} />
-                    <Button
-                        title="Виж моите сметки"
-                        onPress={() => navigation.navigate('Budgets')}
-                    />
+                    <Button title="Виж моите сметки" onPress={() => navigation.navigate('Budgets')} />
                     <View style={{ height: 20 }} />
-                    <Button
-                        title="Виж графики"
-                        onPress={() => navigation.navigate('Charts')}
-                    />
+                    <Button title="Виж графики" onPress={() => navigation.navigate('Charts')} />
                     <View style={{ height: 20 }} />
                     <Button title="Изход" onPress={handleLogout} />
                 </>
             ) : (
                 <>
-                    <Button
-                        title="Регистрация"
-                        onPress={() => navigation.navigate('Register')}
-                    />
+                    <Button title="Регистрация" onPress={() => navigation.navigate('Register')} />
                     <View style={{ height: 20 }} />
-                    <Button
-                        title="Логване"
-                        onPress={() => navigation.navigate('Login')}
-                    />
+                    <Button title="Логване" onPress={() => navigation.navigate('Login')} />
                 </>
             )}
         </View>

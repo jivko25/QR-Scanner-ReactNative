@@ -1,11 +1,13 @@
 import React, { useState } from 'react';
 import { View, Text, TextInput, Button, StyleSheet, Alert } from 'react-native';
 import api from '../utils/api';
+import { useBudgets } from '../storage/budgetsContext';
 
 export default function BudgetCreateScreen({ navigation }) {
   const [name, setName] = useState('');
   const [description, setDescription] = useState('');
   const [displayName, setDisplayName] = useState('');
+  const { fetchBudgets } = useBudgets();
 
   const handleCreate = async () => {
     if (!name.trim()) {
@@ -20,6 +22,9 @@ export default function BudgetCreateScreen({ navigation }) {
     } catch (err) {
       const msg = err.response?.data?.error || 'Проблем при създаване на бюджет';
       Alert.alert('Грешка', msg);
+    }
+    finally {
+      fetchBudgets();
     }
   };
 
