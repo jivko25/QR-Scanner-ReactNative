@@ -57,8 +57,8 @@ export default function HomeScreen({ navigation }) {
                     <Button title="Сканирай бележка" onPress={() => navigation.navigate('Scanner')} />
                     <View style={{ height: 20 }} />
                     <Button title="Виж моите сметки" onPress={() => navigation.navigate('Budgets')} />
-                    <View style={{ height: 20 }} />
-                    <Button title="Виж графики" onPress={() => navigation.navigate('Charts')} />
+                    {/* <View style={{ height: 20 }} />
+                    <Button title="Виж графики" onPress={() => navigation.navigate('Charts')} /> */}
                     <View style={{ height: 20 }} />
                     <Button title="Изход" onPress={handleLogout} />
                 </>

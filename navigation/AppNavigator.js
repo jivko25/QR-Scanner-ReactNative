@@ -3,7 +3,7 @@ import React from 'react';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import { NavigationContainer } from '@react-navigation/native';
 import ScannerScreen from '../screens/ScannerScreen';
-import { ChartScreen } from '../screens/ChartScreen';
+// import { ChartScreen } from '../screens/ChartScreen';
 import HomeScreen from '../screens/HomeScreen';
 import RegisterScreen from '../screens/RegisterScreen';
 import LoginScreen from '../screens/LoginScreen';
@@ -36,11 +36,11 @@ export default function AppNavigator() {
           component={ScannerScreen}
           options={{ title: 'Сканирай бележка' }}
         />
-        <Stack.Screen
+        {/* <Stack.Screen
           name="Charts"
           component={ChartScreen}
           options={{ title: 'Графики' }}
-        />
+        /> */}
         <Stack.Screen
           name="Budgets"
           component={BudgetsScreen}
