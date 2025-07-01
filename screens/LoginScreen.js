@@ -27,8 +27,9 @@ export default function LoginScreen({ navigation }) {
       const refresh_token = res.data.session.refresh_token;
       const user = res.data.session.user;
 
-      saveSession(token, email, user, refresh_token);
-      // fetchBudgets();
+      const displayName = res.data.user.user_metadata.display_name || email;
+
+      saveSession(token, email, user, refresh_token, displayName);
 
       navigation.replace('Home');
     } catch (err) {

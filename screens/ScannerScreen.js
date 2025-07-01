@@ -65,7 +65,7 @@ export default function ScannerScreen({ navigation }) {
         budget_id: selectedBudget, // Използваме избрания бюджет
         scanned_by: user.id,
       };
-      const res = await api.post('/scan', payload, {
+      const res = await api.post('/receipt', payload, {
         headers: { 'Content-Type': 'application/json' },
       });
       console.log('Сървър отговори:', res.data);

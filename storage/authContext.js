@@ -9,11 +9,13 @@ const AuthContext = createContext();
 export const AuthProvider = ({ children }) => {
   const { setBudgets } = useBudgets();
   const [session, setSession] = useState(null);
+  const [displayName, setDisplayName] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState()
 
-  const saveSession = async (token, email, user, refresh_token) => {
+  const saveSession = async (token, email, user, refresh_token, displayName) => {
     const newSession = { token, email, user, refresh_token };
+    setDisplayName(displayName);
     setSession(newSession);
     await AsyncStorage.setItem('session', JSON.stringify(newSession));
   };
@@ -83,7 +85,7 @@ export const AuthProvider = ({ children }) => {
   }, []);
 
   return (
-    <AuthContext.Provider value={{ session, saveSession, getSession, clearSession, loading, loadSessionFromStorage, error }}>
+    <AuthContext.Provider value={{ session, saveSession, getSession, clearSession, loading, loadSessionFromStorage, error, displayName }}>
       {children}
     </AuthContext.Provider>
   );
