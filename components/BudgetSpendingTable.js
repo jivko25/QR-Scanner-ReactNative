@@ -51,7 +51,7 @@ export default function BudgetSpendingTable({ budgetId }) {
                 userId: receipt.scanned_by,
                 userName: receipt.displayName,
                 amount: receipt.amount,
-                date: new Date(receipt.created_at),
+                date: new Date(receipt.date),
             }));
 
             setUsers(formattedUsers);

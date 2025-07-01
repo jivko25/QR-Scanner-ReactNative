@@ -18,8 +18,48 @@ export default function ScannerScreen({ navigation }) {
   const { budgets } = useBudgets();
   const { getSession } = useAuth();
 
+  const [stores, setStores] = useState([]);
+  const [selectedStore, setSelectedStore] = useState(null);
+  const [loadingStores, setLoadingStores] = useState(false);
+
   const [selectedBudget, setSelectedBudget] = useState(null); // За избрания бюджет
   const [isSendingScan, setIsSendingScan] = useState(false); // За избягване на дублирани изпращания
+
+  const [groupedStores, setGroupedStores] = useState({});
+
+  // Групиране по категория
+  useEffect(() => {
+    if (stores.length === 0) {
+      setGroupedStores({});
+      return;
+    }
+    const grouped = stores.reduce((acc, store) => {
+      const categoryName = store.store_categories?.name || 'Други';
+      if (!acc[categoryName]) acc[categoryName] = [];
+      acc[categoryName].push(store);
+      return acc;
+    }, {});
+    setGroupedStores(grouped);
+  }, [stores]);
+
+  useEffect(() => {
+    const fetchStores = async () => {
+      setLoadingStores(true);
+      try {
+        const response = await api.get('/store'); // Твой ендпойнт за магазини
+        setStores(response.data);
+        if (response.data.length > 0) {
+          setSelectedStore(response.data[0].id);
+        }
+      } catch (err) {
+        console.error('Грешка при зареждане на магазини:', err);
+      } finally {
+        setLoadingStores(false);
+      }
+    };
+
+    fetchStores();
+  }, []);
 
 
   if (!permission) {
@@ -54,27 +94,30 @@ export default function ScannerScreen({ navigation }) {
       Alert.alert('Избор на бюджет', 'Моля, изберете бюджет, преди да продължите.');
       return;
     }
-
-    if (isSendingScan) return; // Предотвратява многократно изпращане
+    if (!selectedStore) {
+      Alert.alert('Избор на магазин', 'Моля, изберете магазин, преди да продължите.');
+      return;
+    }
+    if (isSendingScan) return;
 
     setIsSendingScan(true);
     try {
-      const { user } = getSession()
+      const { user } = getSession();
       const payload = {
         raw_code: scannedData,
-        budget_id: selectedBudget, // Използваме избрания бюджет
+        budget_id: selectedBudget,
         scanned_by: user.id,
+        store_id: selectedStore, // добавено
       };
       const res = await api.post('/receipt', payload, {
         headers: { 'Content-Type': 'application/json' },
       });
       console.log('Сървър отговори:', res.data);
       Alert.alert('Успех', 'Касовата бележка е записана успешно!');
-      setModalVisible(false); // Скриваме модала след успех
+      setModalVisible(false);
       navigation.navigate('Home');
     } catch (err) {
       console.error('Грешка при заявката:', err);
-      // По-информативно съобщение за грешка
       const errorMessage = err.response?.data?.message || 'Неизвестна грешка при записване на бележката.';
       Alert.alert('Грешка', errorMessage);
     } finally {
@@ -84,9 +127,10 @@ export default function ScannerScreen({ navigation }) {
 
   const restartScan = () => {
     setScannedData(null);
-    setSelectedBudget(budgets.length > 0 ? budgets[0].id : null); // Връщаме избрания бюджет към първия
+    setSelectedBudget(budgets.length > 0 ? budgets[0].id : null);
+    setSelectedStore(stores.length > 0 ? stores[0].id : null);
     setShowCamera(true);
-    setModalVisible(false); // Уверяваме се, че модалът е скрит
+    setModalVisible(false);
   };
 
   return (
@@ -126,20 +170,48 @@ export default function ScannerScreen({ navigation }) {
             <Text style={styles.modalScannedData}>Сканиран код: {scannedData}</Text>
 
             {
-              budgets.length > 0 ? (
+              budgets.length > 0 ? (<>
+                <Text style={styles.inputLabel}>Изберете сметка</Text>
                 <Picker
                   selectedValue={selectedBudget}
                   style={styles.picker}
                   onValueChange={(itemValue) => setSelectedBudget(itemValue)}
                 >
+                  <Picker.Item label="Изберете сметка" value={null} />
                   {budgets.map((budget) => (
                     <Picker.Item key={budget.id} label={budget.name} value={budget.id} />
                   ))}
                 </Picker>
+              </>
               ) : (
                 <Text style={styles.noBudgetsText}>Няма налични бюджети. Моля, създайте такъв.</Text>
               )
             }
+
+            {loadingStores ? (
+              <ActivityIndicator size="small" color="#0000ff" />
+            ) : stores.length > 0 ? (
+              <>
+                <Text style={styles.inputLabel}>Изберете Магазин</Text>
+                <Picker
+                  selectedValue={selectedStore}
+                  style={styles.picker}
+                  onValueChange={(itemValue) => setSelectedStore(itemValue)}
+                >
+                  {Object.entries(groupedStores).map(([category, storesInCategory]) =>
+                    storesInCategory.map(store => (
+                      <Picker.Item
+                        key={store.id}
+                        label={`${category} — ${store.name}`}
+                        value={store.id}
+                      />
+                    ))
+                  )}
+                </Picker>
+              </>
+            ) : (
+              <Text style={styles.noBudgetsText}>Няма налични магазини.</Text>
+            )}
 
             <View style={styles.modalButtons}>
               <Button
@@ -152,10 +224,6 @@ export default function ScannerScreen({ navigation }) {
           </View>
         </View>
       </Modal>
-
-      <View style={styles.navButton}>
-        <Button title="Към графиките" onPress={() => navigation.navigate('Charts')} />
-      </View>
     </View>
   );
 }
@@ -235,4 +303,9 @@ const styles = StyleSheet.create({
     marginBottom: 20,
     textAlign: 'center',
   },
+  inputLabel: {
+    textAlign: 'left',
+    width: '100%',
+    fontWeight: 'bold'
+  }
 });
