@@ -6,6 +6,7 @@ import LottieView from 'lottie-react-native';
 import loadingAnimation from '../assets/loading-animation.json';
 import Ionicons from '@expo/vector-icons/Ionicons';
 import api from '../utils/api';
+import { getColorByIndex } from '../utils/getColor';
 
 export default function HomeScreen({ navigation }) {
     const { session, loadSessionFromStorage, clearSession, loading, displayName } = useAuth();
@@ -71,18 +72,6 @@ export default function HomeScreen({ navigation }) {
         fetchReceipts();
     }, [selectedDate, session]);
 
-    const brightColors = [
-        '#FF5A5F', // ярко червено-розово
-        '#FFB400', // жълто-оранжево
-        '#00CECB', // ярко тюркоазено
-        '#FF6F61', // коралово
-        '#1E90FF', // ярко синьо
-    ];
-
-    function getColorByIndex(index) {
-        return brightColors[index % brightColors.length];
-    }
-
     const handleLogout = async () => {
         await clearSession();
         navigation.replace('Login');
@@ -121,12 +110,20 @@ export default function HomeScreen({ navigation }) {
                     </View>
 
                     <ScrollView showsVerticalScrollIndicator={false}>
-                        <TouchableOpacity style={styles.challengeCard} onPress={() => navigation.navigate('Scanner')}>
-                            <Text style={styles.challengeTitle}>Сканирай бележка</Text>
-                            <Text style={styles.challengeSubtitle}>
-                                Сканирай своята касова бележка всеки път след покупка
-                            </Text>
-                        </TouchableOpacity>
+                        <View styles={styles.mainActionsContainer}>
+                            <TouchableOpacity style={styles.challengeCard} onPress={() => navigation.navigate('Scanner')}>
+                                <Text style={styles.challengeTitle}>Сканирай бележка</Text>
+                                <Text style={styles.challengeSubtitle}>
+                                    Сканирай своята касова бележка всеки път след покупка
+                                </Text>
+                            </TouchableOpacity>
+                            <TouchableOpacity style={[styles.challengeCard, styles.graphicsCard]} onPress={() => navigation.navigate('Charts')}>
+                                <Text style={styles.challengeTitle}>Графики</Text>
+                                <Text style={styles.challengeSubtitle}>
+                                    Разгледай визуализацията на твоите сметки
+                                </Text>
+                            </TouchableOpacity>
+                        </View>
 
                         {/* Days selector */}
                         <View style={styles.daysRow}>
@@ -502,5 +499,15 @@ const styles = StyleSheet.create({
         borderRadius: 30,
         justifyContent: 'center',
         alignItems: 'center',
-    }
+    },
+    graphicsCard: {
+        backgroundColor: '#FFB400'
+    },
+    mainActionsContainer: {
+        flexDirection: 'row',
+        justifyContent: 'space-between',
+        padding: 10,
+        gap: 10, // ако използваш React Native >= 0.71
+    },
+
 });

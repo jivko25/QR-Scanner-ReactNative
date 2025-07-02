@@ -12,6 +12,7 @@ import BudgetDetailsScreen from '../screens/BudgetDetails';
 import BudgetActionsScreen from '../screens/BudgetActions';
 import BudgetCreateScreen from '../screens/BudgetCreateScreen';
 import BudgetJoinScreen from '../screens/BudgetJoinScreen';
+import { ChartScreen } from '../screens/ChartScreen';
 
 const Stack = createNativeStackNavigator();
 
@@ -36,11 +37,11 @@ export default function AppNavigator() {
           component={ScannerScreen}
           options={{ title: 'Сканирай бележка' }}
         />
-        {/* <Stack.Screen
+        <Stack.Screen
           name="Charts"
           component={ChartScreen}
           options={{ title: 'Графики' }}
-        /> */}
+        />
         <Stack.Screen
           name="Budgets"
           component={BudgetsScreen}
