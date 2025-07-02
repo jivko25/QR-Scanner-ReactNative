@@ -13,6 +13,8 @@ import BudgetActionsScreen from '../screens/BudgetActions';
 import BudgetCreateScreen from '../screens/BudgetCreateScreen';
 import BudgetJoinScreen from '../screens/BudgetJoinScreen';
 import { ChartScreen } from '../screens/ChartScreen';
+import BudgetEditScreen from '../screens/BudgetEditScreen';
+import BudgetInviteScreen from '../screens/BudgetInviteScreen';
 
 const Stack = createNativeStackNavigator();
 
@@ -61,6 +63,16 @@ export default function AppNavigator() {
           name="BudgetCreateScreen"
           component={BudgetCreateScreen}
           options={{ title: 'Създаване на сметка' }}
+        />
+        <Stack.Screen
+          name="BudgetEdit"
+          component={BudgetEditScreen}
+          options={{ title: 'Редактиране на сметка' }}
+        />
+        <Stack.Screen
+          name="BudgetInviteScreen"
+          component={BudgetInviteScreen}
+          options={{ title: 'Покани потребител' }}
         />
         <Stack.Screen
           name="BudgetJoinScreen"

@@ -1,13 +1,10 @@
-import React, { useEffect, useState } from 'react';
+import React from 'react';
 import {
   View,
   Text,
   StyleSheet,
   TouchableOpacity,
-  Clipboard,
   Alert,
-  ActivityIndicator,
-  FlatList,
   ScrollView
 } from 'react-native';
 import api from '../utils/api';
@@ -15,37 +12,6 @@ import BudgetSpendingTable from '../components/BudgetSpendingTable';
 
 export default function BudgetDetailsScreen({ route, navigation }) {
   const { budget } = route.params;
-  const [spendingData, setSpendingData] = useState([]);
-  const [loading, setLoading] = useState(true);
-  const [total, setTotal] = useState(0);
-
-  const copyToClipboard = () => {
-    if (budget?.invite_code) {
-      Clipboard.setString(budget.invite_code);
-      Alert.alert('Копирано!', 'Кодът за покана е копиран в клипборда.');
-    }
-  };
-
-  const fetchSpendingData = async () => {
-    try {
-      setLoading(true);
-      const res = await api.get(`/budget/${budget.id}/spending-by-user`);
-      const data = res.data;
-  
-      setSpendingData(data);
-      const totalSum = data.reduce((sum, entry) => sum + entry.totalSpending, 0);
-      setTotal(totalSum);
-    } catch (err) {
-      console.error('Грешка при взимане на разходите:', err);
-      Alert.alert('Грешка', 'Неуспешно зареждане на разходите по потребители.');
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  useEffect(() => {
-    fetchSpendingData();
-  }, []);
 
   const leaveBudget = async () => {
     Alert.alert('Потвърждение', 'Сигурни ли сте, че искате да напуснете този бюджет?', [
@@ -72,38 +38,36 @@ export default function BudgetDetailsScreen({ route, navigation }) {
     ]);
   };
 
-  const renderSpender = ({ item }) => {
-    const percent = total ? (item.totalSpending / total) * 100 : 0;
-
-    return (
-      <View style={styles.spenderRow}>
-        <Text style={styles.spenderName}>{item.userName}</Text>
-        <Text style={styles.spenderAmount}>{item.totalSpending.toFixed(2)} лв.</Text>
-        <View style={styles.progressBar}>
-          <View style={[styles.progressFill, { width: `${percent}%` }]} />
-        </View>
-      </View>
-    );
-  };
-
   return (
     <ScrollView style={styles.container}>
       <Text style={styles.title}>{budget?.name}</Text>
+      <Text style={styles.subtitle}>{budget?.role}</Text>
+
       <Text>Описание: {budget?.description || 'Няма описание'}</Text>
 
-      <TouchableOpacity onPress={copyToClipboard}>
-        <Text>
-          Код за покана: <Text style={styles.inviteCodeText}>{budget?.invite_code || 'Няма код'}</Text>
-        </Text>
-      </TouchableOpacity>
+      <Text>Дневен лимит: {budget?.daily_limit.toFixed(2)}</Text>
 
       <Text>Създаден на: {new Date(budget.created_at).toLocaleDateString()}</Text>
+
+      <View style={styles.buttonsContainer}>
+      {
+        budget.role === 'owner' &&
+        <TouchableOpacity
+        style={styles.inviteButton}
+        onPress={() => navigation.navigate('BudgetInviteScreen', { inviteCode: budget.invite_code })}
+        >
+          <Text style={styles.inviteButtonText}>Кани потребители</Text>
+        </TouchableOpacity>
+      }
 
       <TouchableOpacity style={styles.leaveButton} onPress={leaveBudget}>
         <Text style={styles.leaveButtonText}>Напусни бюджета</Text>
       </TouchableOpacity>
 
-      <Text style={styles.sectionTitle}>Разходи по потребители</Text>
+      <TouchableOpacity style={styles.editButton} onPress={() => navigation.navigate('BudgetEdit', { budget })}>
+        <Text style={styles.leaveButtonText}>Редактирай</Text>
+      </TouchableOpacity>
+      </View>
 
       <BudgetSpendingTable budgetId={budget.id} />
     </ScrollView>
@@ -111,17 +75,31 @@ export default function BudgetDetailsScreen({ route, navigation }) {
 }
 
 const styles = StyleSheet.create({
-  container: { padding: 16 , height: '100%', overflow: 'scroll'},
-  title: { fontSize: 22, fontWeight: 'bold', marginBottom: 12 },
-  inviteCodeText: {
+  container: { padding: 16, height: '100%', overflow: 'scroll' },
+  title: { fontSize: 22, fontWeight: 'bold' },
+  subtitle: { fontSize: 12, fontWeight: 'bold', marginBottom: 12, color: '#333' },
+  inviteButton: {
+    marginVertical: 20,
+    paddingVertical: 12,
+    backgroundColor: '#007AFF',
+    borderRadius: 6,
+    alignItems: 'center',
+  },
+  inviteButtonText: {
+    color: '#fff',
     fontWeight: 'bold',
-    color: '#007bff',
-    textDecorationLine: 'underline',
+    fontSize: 16,
   },
   leaveButton: {
-    marginTop: 30,
     paddingVertical: 12,
     backgroundColor: '#d9534f',
+    borderRadius: 6,
+    alignItems: 'center',
+  },
+  editButton: {
+    marginTop: 20,
+    paddingVertical: 12,
+    backgroundColor: '#FFB400',
     borderRadius: 6,
     alignItems: 'center',
   },
@@ -130,41 +108,7 @@ const styles = StyleSheet.create({
     fontWeight: 'bold',
     fontSize: 16,
   },
-  sectionTitle: {
-    marginTop: 30,
-    fontSize: 18,
-    fontWeight: 'bold',
-    marginBottom: 10,
-  },
-  totalText: {
-    fontSize: 16,
-    fontWeight: '600',
-    marginBottom: 10,
-  },
-  spenderRow: {
-    marginBottom: 12,
-    backgroundColor: '#f9f9f9',
-    padding: 10,
-    borderRadius: 8,
-  },
-  spenderName: {
-    fontWeight: '600',
-    fontSize: 16,
-    marginBottom: 4,
-  },
-  spenderAmount: {
-    fontSize: 14,
-    marginBottom: 4,
-    color: '#444',
-  },
-  progressBar: {
-    height: 6,
-    backgroundColor: '#e0e0e0',
-    borderRadius: 4,
-    overflow: 'hidden',
-  },
-  progressFill: {
-    height: 6,
-    backgroundColor: '#007AFF',
-  },
+  buttonsContainer: {
+    marginTop: 20
+  }
 });

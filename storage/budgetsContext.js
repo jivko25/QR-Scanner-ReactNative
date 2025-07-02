@@ -13,8 +13,6 @@ export const BudgetProvider = ({ children }) => {
       setLoading(true);
       const res = await api.get('/budget');
 
-      console.warn(res.data.budgets)
-
       setBudgets(res.data.budgets);
     } catch (e) {
         setError(e.message)

@@ -72,6 +72,23 @@ export default function HomeScreen({ navigation }) {
         fetchReceipts();
     }, [selectedDate, session]);
 
+    const handleRefresh = async () => {
+        setError(null);
+        setLoadingReceipts(true);
+
+        try {
+            await fetchBudgets();            // презареди бюджетите
+            if (selectedDate && session?.user) {
+                const response = await api.get(`/receipt/latest?date=${selectedDate}`);
+                setReceipts(response.data.receipts || []);
+            }
+        } catch (e) {
+            setError(e.message);
+        } finally {
+            setLoadingReceipts(false);
+        }
+    };
+
     const handleLogout = async () => {
         await clearSession();
         navigation.replace('Login');
@@ -100,13 +117,19 @@ export default function HomeScreen({ navigation }) {
                     <View style={styles.header}>
                         <View style={{ flexDirection: 'row', alignItems: 'center' }}>
                             <View style={{ marginLeft: 12 }}>
-                                <Text style={styles.greeting}>Здравей{displayName && `, ${displayName}`}</Text>
+                                <Text style={styles.greeting}>Здравей{displayName && `, \n${displayName}`}</Text>
                                 <Text style={styles.dateText}>Днес {new Date().toLocaleDateString('bg-BG', { day: 'numeric', month: 'long' })}</Text>
                             </View>
                         </View>
-                        <TouchableOpacity style={styles.searchButton} onPress={handleLogout}>
-                            <Ionicons name="log-out-outline" size={20} color="#FF2c2c" />
-                        </TouchableOpacity>
+                        <View style={{ flexDirection: 'row', alignItems: 'center' }}>
+                            <TouchableOpacity style={styles.refreshButton} onPress={handleRefresh}>
+                                <Ionicons name="refresh" size={20} color="#007AFF" />
+                            </TouchableOpacity>
+
+                            <TouchableOpacity style={styles.searchButton} onPress={handleLogout}>
+                                <Ionicons name="log-out-outline" size={20} color="#FF2c2c" />
+                            </TouchableOpacity>
+                        </View>
                     </View>
 
                     <ScrollView showsVerticalScrollIndicator={false}>
@@ -313,6 +336,9 @@ const styles = StyleSheet.create({
         color: '#666',
     },
     searchButton: {
+        padding: 8,
+    },
+    refreshButton: {
         padding: 8,
     },
     challengeCard: {

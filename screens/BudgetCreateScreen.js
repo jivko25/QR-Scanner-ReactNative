@@ -7,6 +7,7 @@ export default function BudgetCreateScreen({ navigation }) {
   const [name, setName] = useState('');
   const [description, setDescription] = useState('');
   const [displayName, setDisplayName] = useState('');
+  const [dailyLimit, setDailyLimit] = useState('');
   const { fetchBudgets } = useBudgets();
 
   const handleCreate = async () => {
@@ -15,7 +16,7 @@ export default function BudgetCreateScreen({ navigation }) {
     }
 
     try {
-      const res = await api.post('/budget', { name, description, displayName });
+      const res = await api.post('/budget', { name, description, displayName, dailyLimit });
 
       Alert.alert('Успех', 'Бюджетът е създаден успешно!');
       navigation.goBack(); // или navigation.replace('Budgets') ако искаш директно към списъка
