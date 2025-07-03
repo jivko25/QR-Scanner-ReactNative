@@ -34,8 +34,7 @@
     "@babel/core": "^7.20.0"
   },
   "overrides": {
-    "@expo/config-plugins": "10.0.0",
-      "@expo/prebuild-config": "9.0.4"
+    "@expo/config-plugins": "10.0.0"
   },
   "private": true
 }

@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "647004368623",
+    "project_id": "quack-scanner",
+    "storage_bucket": "quack-scanner.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:647004368623:android:c3407625f2e26fb2b7351a",
+        "android_client_info": {
+          "package_name": "quack.scanner"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyCRdGO4W2-yHrLRoK9Ks8uotKTK8Sal6AI"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
