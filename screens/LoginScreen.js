@@ -5,6 +5,7 @@ import { BASE_URL } from '../utils/api';
 import { saveSession } from '../utils/auth';
 import { useBudgets } from '../storage/budgetsContext';
 import { useAuth } from '../storage/authContext';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
 export default function LoginScreen({ navigation }) {
   const [email, setEmail] = useState('');
@@ -16,9 +17,12 @@ export default function LoginScreen({ navigation }) {
   const handleLogin = async () => {
     try {
       setLoading(true)
+      const pushToken = await AsyncStorage.getItem('push_token');
+
       const res = await axios.post(`${BASE_URL}/auth/login`, {
         email,
         password,
+        pushToken
       });
 
       setLoading(false)
@@ -30,6 +34,8 @@ export default function LoginScreen({ navigation }) {
       const displayName = res.data.user.user_metadata.display_name || email;
 
       saveSession(token, email, user, refresh_token, displayName);
+
+      fetchBudgets();
 
       navigation.replace('Home');
     } catch (err) {

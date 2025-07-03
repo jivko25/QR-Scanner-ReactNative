@@ -56,7 +56,7 @@ export default function BudgetDetailsScreen({ route, navigation }) {
         style={styles.inviteButton}
         onPress={() => navigation.navigate('BudgetInviteScreen', { inviteCode: budget.invite_code })}
         >
-          <Text style={styles.inviteButtonText}>Кани потребители</Text>
+          <Text style={styles.inviteButtonText}>Покани потребители</Text>
         </TouchableOpacity>
       }
 
