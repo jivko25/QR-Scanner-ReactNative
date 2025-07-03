@@ -90,6 +90,7 @@ export default function HomeScreen({ navigation }) {
     };
 
     const handleLogout = async () => {
+        await api.post('/auth/logout')
         await clearSession();
         navigation.replace('Login');
     };

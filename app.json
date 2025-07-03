@@ -24,7 +24,8 @@
       "permissions": [
         "android.permission.CAMERA"
       ],
-      "package": "com.jivko25.qrscannerapp"
+      "package": "com.jivko25.qrscannerapp",
+      "googleServicesFile": "./google-services.json"
     },
     "web": {
       "favicon": "./assets/favicon.png"
