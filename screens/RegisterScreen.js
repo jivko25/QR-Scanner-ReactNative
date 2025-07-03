@@ -1,7 +1,8 @@
 import React, { useState } from 'react';
-import { View, Text, TextInput, Button, StyleSheet, Alert } from 'react-native';
+import { View, Text, TextInput, Button, StyleSheet } from 'react-native';
 import axios from 'axios';
 import { BASE_URL } from '../utils/api';
+import Toast from 'react-native-toast-message';
 
 export default function RegisterScreen({ navigation }) {
     const [email, setEmail] = useState('');
@@ -11,7 +12,11 @@ export default function RegisterScreen({ navigation }) {
     const handleRegister = async () => {
         // Проста валидация
         if (!email || !password || !displayName) {
-            Alert.alert('Грешка', 'Моля, попълнете всички полета (Имейл, Парола, Показвано име).');
+            Toast.show({
+                type: 'error',
+                text1: 'Грешка',
+                text2: 'Моля, попълнете всички полета (Имейл, Парола, Име).'
+              });
             return;
         }
 
@@ -22,15 +27,20 @@ export default function RegisterScreen({ navigation }) {
                 displayName, // <--- Изпращаме displayName към бекенда
             });
     
-            Alert.alert(
-                'Проверка на имейл',
-                'Успешна регистрация! Моля, потвърди имейла си, преди да влезеш в приложението.'
-            );
+            Toast.show({
+                type: 'success',
+                text1: 'Успех',
+                text2: 'Успешна регистрация! Моля, потвърди имейла си, преди да влезеш в приложението.'
+              });
     
             navigation.replace('Login');
         } catch (err) {
             console.error(err);
-            Alert.alert('Грешка при регистрация', err.response?.data?.error || 'Проблем със сървъра');
+            Toast.show({
+                type: 'error',
+                text1: 'Грешка',
+                text2: `Грешка при регистрация, ${err.response?.data?.error || 'Проблем със сървъра'}`
+              });
         }
     };
 

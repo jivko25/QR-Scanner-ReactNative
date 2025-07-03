@@ -9,9 +9,13 @@ import {
 } from 'react-native';
 import api from '../utils/api';
 import BudgetSpendingTable from '../components/BudgetSpendingTable';
+import Toast from 'react-native-toast-message';
+import { useBudgets } from '../storage/budgetsContext';
+import DefaultLayout from '../components/DefaultLayout';
 
 export default function BudgetDetailsScreen({ route, navigation }) {
   const { budget } = route.params;
+  const { fetchBudgets } = useBudgets();
 
   const leaveBudget = async () => {
     Alert.alert('Потвърждение', 'Сигурни ли сте, че искате да напуснете този бюджет?', [
@@ -21,17 +25,21 @@ export default function BudgetDetailsScreen({ route, navigation }) {
         style: 'destructive',
         onPress: async () => {
           try {
-            const response = await api.delete(`/budgets/${budget.id}/leave`);
+            await api.delete(`/budget/${budget.id}/leave`);
 
-            if (response.ok) {
-              Alert.alert('Успех', 'Успешно напуснахте бюджета.');
-              navigation.goBack();
-            } else {
-              const errorData = await response.json();
-              Alert.alert('Грешка', errorData.error || 'Неуспешно напускане на бюджета.');
-            }
+            Toast.show({
+              type: 'success',
+              text1: 'Успех',
+              text2: 'Успешно напуснахте бюджета.'
+            });
+            fetchBudgets();
+            navigation.replace('Home');
           } catch (error) {
-            Alert.alert('Грешка', 'Възникна проблем при напускане на бюджета.');
+            Toast.show({
+              type: 'error',
+              text1: 'Грешка',
+              text2: 'Възникна проблем при напускане на бюджета.'
+            });
           }
         },
       },
@@ -39,38 +47,40 @@ export default function BudgetDetailsScreen({ route, navigation }) {
   };
 
   return (
-    <ScrollView style={styles.container}>
-      <Text style={styles.title}>{budget?.name}</Text>
-      <Text style={styles.subtitle}>{budget?.role}</Text>
+    <DefaultLayout>
+      <ScrollView style={styles.container}>
+        <Text style={styles.title}>{budget?.name}</Text>
+        <Text style={styles.subtitle}>{budget?.role}</Text>
 
-      <Text>Описание: {budget?.description || 'Няма описание'}</Text>
+        <Text>Описание: {budget?.description || 'Няма описание'}</Text>
 
-      <Text>Дневен лимит: {budget?.daily_limit.toFixed(2)}</Text>
+        <Text>Дневен лимит: {budget?.daily_limit.toFixed(2)}</Text>
 
-      <Text>Създаден на: {new Date(budget.created_at).toLocaleDateString()}</Text>
+        <Text>Създаден на: {new Date(budget.created_at).toLocaleDateString()}</Text>
 
-      <View style={styles.buttonsContainer}>
-      {
-        budget.role === 'owner' &&
-        <TouchableOpacity
-        style={styles.inviteButton}
-        onPress={() => navigation.navigate('BudgetInviteScreen', { inviteCode: budget.invite_code })}
-        >
-          <Text style={styles.inviteButtonText}>Покани потребители</Text>
-        </TouchableOpacity>
-      }
+        <View style={styles.buttonsContainer}>
+          {
+            budget.role === 'owner' &&
+            <TouchableOpacity
+              style={styles.inviteButton}
+              onPress={() => navigation.navigate('BudgetInviteScreen', { inviteCode: budget.invite_code })}
+            >
+              <Text style={styles.inviteButtonText}>Покани потребители</Text>
+            </TouchableOpacity>
+          }
 
-      <TouchableOpacity style={styles.leaveButton} onPress={leaveBudget}>
-        <Text style={styles.leaveButtonText}>Напусни бюджета</Text>
-      </TouchableOpacity>
+          <TouchableOpacity style={styles.leaveButton} onPress={leaveBudget}>
+            <Text style={styles.leaveButtonText}>Напусни бюджета</Text>
+          </TouchableOpacity>
 
-      <TouchableOpacity style={styles.editButton} onPress={() => navigation.navigate('BudgetEdit', { budget })}>
-        <Text style={styles.leaveButtonText}>Редактирай</Text>
-      </TouchableOpacity>
-      </View>
+          <TouchableOpacity style={styles.editButton} onPress={() => navigation.navigate('BudgetEdit', { budget })}>
+            <Text style={styles.leaveButtonText}>Редактирай</Text>
+          </TouchableOpacity>
+        </View>
 
-      <BudgetSpendingTable budgetId={budget.id} />
-    </ScrollView>
+        <BudgetSpendingTable budgetId={budget.id} />
+      </ScrollView>
+    </DefaultLayout>
   );
 }
 

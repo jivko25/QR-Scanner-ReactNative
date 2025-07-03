@@ -1,7 +1,9 @@
 import React, { useState } from 'react';
-import { View, Text, TextInput, Button, StyleSheet, Alert } from 'react-native';
+import { View, Text, TextInput, Button, StyleSheet } from 'react-native';
 import api from '../utils/api';
 import { useBudgets } from '../storage/budgetsContext';
+import Toast from 'react-native-toast-message';
+import DefaultLayout from '../components/DefaultLayout';
 
 export default function BudgetCreateScreen({ navigation }) {
   const [name, setName] = useState('');
@@ -12,17 +14,30 @@ export default function BudgetCreateScreen({ navigation }) {
 
   const handleCreate = async () => {
     if (!name.trim()) {
-      return Alert.alert('Грешка', 'Моля въведи име на бюджета.');
+      Toast.show({
+        type: 'error',
+        text1: 'Грешка',
+        text2: 'Моля въведи име на бюджета.'
+      });
+      return;
     }
 
     try {
-      const res = await api.post('/budget', { name, description, displayName, dailyLimit });
+      await api.post('/budget', { name, description, displayName, dailyLimit });
 
-      Alert.alert('Успех', 'Бюджетът е създаден успешно!');
+      Toast.show({
+        type: 'success',
+        text1: 'Успех',
+        text2: 'Бюджетът е създаден успешно!'
+      });
       navigation.goBack(); // или navigation.replace('Budgets') ако искаш директно към списъка
     } catch (err) {
       const msg = err.response?.data?.error || 'Проблем при създаване на бюджет';
-      Alert.alert('Грешка', msg);
+      Toast.show({
+        type: 'error',
+        text1: 'Грешка',
+        text2: msg
+      });
     }
     finally {
       fetchBudgets();
@@ -30,32 +45,34 @@ export default function BudgetCreateScreen({ navigation }) {
   };
 
   return (
-    <View style={styles.container}>
-      <Text>Име на бюджета</Text>
-      <TextInput
-        style={styles.input}
-        value={name}
-        onChangeText={setName}
-        placeholder="Пример: Семеен бюджет"
-      />
-      <Text>Описание (по избор)</Text>
-      <TextInput
-        style={styles.input}
-        value={description}
-        onChangeText={setDescription}
-        placeholder="Описание на бюджета"
-      />
-      <Text>Вашето име в сметката</Text>
-      <TextInput
-        style={styles.input}
-        value={displayName}
-        onChangeText={setDisplayName}
-        placeholder=""
-        autoCapitalize="none"
-      />
+    <DefaultLayout>
+      <View style={styles.container}>
+        <Text>Име на бюджета</Text>
+        <TextInput
+          style={styles.input}
+          value={name}
+          onChangeText={setName}
+          placeholder="Пример: Семеен бюджет"
+        />
+        <Text>Описание (по избор)</Text>
+        <TextInput
+          style={styles.input}
+          value={description}
+          onChangeText={setDescription}
+          placeholder="Описание на бюджета"
+        />
+        <Text>Вашето име в сметката</Text>
+        <TextInput
+          style={styles.input}
+          value={displayName}
+          onChangeText={setDisplayName}
+          placeholder=""
+          autoCapitalize="none"
+        />
 
-      <Button title="Създай бюджет" onPress={handleCreate} />
-    </View>
+        <Button title="Създай бюджет" onPress={handleCreate} />
+      </View>
+    </DefaultLayout>
   );
 }
 

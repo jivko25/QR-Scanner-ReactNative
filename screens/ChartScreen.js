@@ -14,6 +14,7 @@ import { LineChart } from 'react-native-gifted-charts';
 import Ionicons from '@expo/vector-icons/Ionicons';
 import api from '../utils/api';
 import { getColorByIndex } from '../utils/getColor';
+import DefaultLayout from '../components/DefaultLayout';
 
 function getMonday(date) {
     const d = new Date(date);
@@ -95,105 +96,107 @@ export function ChartScreen() {
     }
 
     return (
-        <ScrollView style={chartStyles.container}>
-            <View style={chartStyles.topControls}>
-                <TouchableOpacity style={chartStyles.navButton} onPress={handlePreviousWeek}>
-                    <Ionicons name="chevron-back" size={20} color="#007AFF" />
-                    <Text style={chartStyles.navText}>Предишна</Text>
-                </TouchableOpacity>
-                <TouchableOpacity style={chartStyles.navButton} onPress={handleNextWeek}>
-                    <Text style={chartStyles.navText}>Следваща</Text>
-                    <Ionicons name="chevron-forward" size={20} color="#007AFF" />
-                </TouchableOpacity>
-            </View>
+        <DefaultLayout>
+            <ScrollView style={chartStyles.container}>
+                <View style={chartStyles.topControls}>
+                    <TouchableOpacity style={chartStyles.navButton} onPress={handlePreviousWeek}>
+                        <Ionicons name="chevron-back" size={20} color="#007AFF" />
+                        <Text style={chartStyles.navText}>Предишна</Text>
+                    </TouchableOpacity>
+                    <TouchableOpacity style={chartStyles.navButton} onPress={handleNextWeek}>
+                        <Text style={chartStyles.navText}>Следваща</Text>
+                        <Ionicons name="chevron-forward" size={20} color="#007AFF" />
+                    </TouchableOpacity>
+                </View>
 
-            {budgetsData.map((budget, index) => {
-                const sortedReceipts = [...budget.receipts].sort((a, b) => new Date(a.date) - new Date(b.date));
+                {budgetsData.map((budget, index) => {
+                    const sortedReceipts = [...budget.receipts].sort((a, b) => new Date(a.date) - new Date(b.date));
 
-                const weekStartStr = formatDateLocal(currentWeekStart);
-                const weekEnd = new Date(currentWeekStart);
-                weekEnd.setDate(weekEnd.getDate() + 6);
-                const weekEndStr = formatDateLocal(weekEnd);
+                    const weekStartStr = formatDateLocal(currentWeekStart);
+                    const weekEnd = new Date(currentWeekStart);
+                    weekEnd.setDate(weekEnd.getDate() + 6);
+                    const weekEndStr = formatDateLocal(weekEnd);
 
-                const weekly = sortedReceipts.filter(item => {
-                    const d = formatDateLocal(item.date);
-                    return d >= weekStartStr && d <= weekEndStr;
-                });
+                    const weekly = sortedReceipts.filter(item => {
+                        const d = formatDateLocal(item.date);
+                        return d >= weekStartStr && d <= weekEndStr;
+                    });
 
-                const grouped = weekly.reduce((acc, it) => {
-                    const key = formatDateLocal(it.date);
-                    acc[key] = (acc[key] || 0) + parseFloat(it.amount);
-                    return acc;
-                }, {});
+                    const grouped = weekly.reduce((acc, it) => {
+                        const key = formatDateLocal(it.date);
+                        acc[key] = (acc[key] || 0) + parseFloat(it.amount);
+                        return acc;
+                    }, {});
 
-                const sortedDates = Object.keys(grouped).sort((a, b) => new Date(a) - new Date(b));
-                const labels = sortedDates.map(dateStr => getWeekdayLabel(dateStr));
-                const amounts = sortedDates.map(dateStr => grouped[dateStr]);
-                const total = amounts.reduce((s, v) => s + v, 0);
+                    const sortedDates = Object.keys(grouped).sort((a, b) => new Date(a) - new Date(b));
+                    const labels = sortedDates.map(dateStr => getWeekdayLabel(dateStr));
+                    const amounts = sortedDates.map(dateStr => grouped[dateStr]);
+                    const total = amounts.reduce((s, v) => s + v, 0);
 
-                const chartData = amounts.map((amount, i) => ({
-                    value: amount,
-                    label: labels[i],
-                    date: sortedDates[i],
-                }));
+                    const chartData = amounts.map((amount, i) => ({
+                        value: amount,
+                        label: labels[i],
+                        date: sortedDates[i],
+                    }));
 
-                const limitValue = budget.budgetDailyLimit; // лимитът в лева
-                const limitLineData = chartData.map((point) => ({
-                    value: limitValue,
-                    label: point.label,
-                }));
+                    const limitValue = budget.budgetDailyLimit; // лимитът в лева
+                    const limitLineData = chartData.map((point) => ({
+                        value: limitValue,
+                        label: point.label,
+                    }));
 
-                return (
-                    <View key={budget.id} style={chartStyles.budgetChartContainer}>
-                        <Text style={chartStyles.title}>Бюджет: {budget.name}</Text>
-                        <Text style={chartStyles.subtitle}>
-                            Разходи за периода: {weekStartStr} – {weekEndStr}
-                        </Text>
-                        <Text style={chartStyles.subtitle}>Общо: {total.toFixed(2)} лв.</Text>
+                    return (
+                        <View key={budget.id} style={chartStyles.budgetChartContainer}>
+                            <Text style={chartStyles.title}>Бюджет: {budget.name}</Text>
+                            <Text style={chartStyles.subtitle}>
+                                Разходи за периода: {weekStartStr} – {weekEndStr}
+                            </Text>
+                            <Text style={chartStyles.subtitle}>Общо: {total.toFixed(2)} лв.</Text>
 
-                        {labels.length === 0 ? (
-                            <View style={chartStyles.noDataChartContainer}>
-                                <Text style={chartStyles.noDataText}>Няма данни за този бюджет за избраната седмица.</Text>
-                            </View>
-                        ) : (
-                            <LineChart
-                                data={chartData}
-                                data2={limitLineData}
-                                areaChart
-                                curved
-                                height={220}
-                                thickness={3}
-                                color={getColorByIndex(index, 'secondary')}
-                                noOfSections={4}
-                                startFillColor={getColorByIndex(index, 'secondary')}   // Запълване (горе)
-                                endFillColor="#ffffff00"                  // Преливане към прозрачно (долу)
-                                yAxisTextStyle={{ color: '#888' }}
-                                xAxisLabelTextStyle={{ color: '#888' }}
-                                color2='#FF3B30'
-                                thickness2={1}
-                                hideDataPoints2={true}
-                                rulesColor="#eee"
-                                showVerticalLines
-                                xAxisColor="#ccc"
-                                yAxisColor="#ccc"
-                                showValuesAsDataPoints
-                                isAnimated
-                                startOpacity={0}
-                                endOpacity={0}
-                                onPress={(item) => {
-                                    Alert.alert(
-                                        `Бюджет ${budget.name}`,
-                                        `Дата: ${item.date}\nСума: ${item.value.toFixed(2)} лв.`
-                                    );
-                                }}
-                                hideDataPoints={false}
-                                dataPointsColor="#ffa726"
-                            />
-                        )}
-                    </View>
-                );
-            })}
-        </ScrollView>
+                            {labels.length === 0 ? (
+                                <View style={chartStyles.noDataChartContainer}>
+                                    <Text style={chartStyles.noDataText}>Няма данни за този бюджет за избраната седмица.</Text>
+                                </View>
+                            ) : (
+                                <LineChart
+                                    data={chartData}
+                                    data2={limitLineData}
+                                    areaChart
+                                    curved
+                                    height={220}
+                                    thickness={3}
+                                    color={getColorByIndex(index, 'secondary')}
+                                    noOfSections={4}
+                                    startFillColor={getColorByIndex(index, 'secondary')}   // Запълване (горе)
+                                    endFillColor="#ffffff00"                  // Преливане към прозрачно (долу)
+                                    yAxisTextStyle={{ color: '#888' }}
+                                    xAxisLabelTextStyle={{ color: '#888' }}
+                                    color2='#FF3B30'
+                                    thickness2={1}
+                                    hideDataPoints2={true}
+                                    rulesColor="#eee"
+                                    showVerticalLines
+                                    xAxisColor="#ccc"
+                                    yAxisColor="#ccc"
+                                    showValuesAsDataPoints
+                                    isAnimated
+                                    startOpacity={0}
+                                    endOpacity={0}
+                                    onPress={(item) => {
+                                        Alert.alert(
+                                            `Бюджет ${budget.name}`,
+                                            `Дата: ${item.date}\nСума: ${item.value.toFixed(2)} лв.`
+                                        );
+                                    }}
+                                    hideDataPoints={false}
+                                    dataPointsColor="#ffa726"
+                                />
+                            )}
+                        </View>
+                    );
+                })}
+            </ScrollView>
+        </DefaultLayout>
     );
 }
 

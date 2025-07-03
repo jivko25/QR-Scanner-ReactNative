@@ -1,10 +1,11 @@
 import React, { useState, useEffect } from 'react';
-import { View, Text, Button, StyleSheet, TouchableOpacity, Alert, Modal, ActivityIndicator } from 'react-native';
+import { View, Text, Button, StyleSheet, TouchableOpacity, Modal, ActivityIndicator } from 'react-native';
 import { CameraView, useCameraPermissions } from 'expo-camera';
 import { Picker } from '@react-native-picker/picker'; // Ще трябва да инсталирате този пакет
 import api from '../utils/api'; // Предполагам, че api.js вече е настроен правилно за вашите заявки
 import { useBudgets } from '../storage/budgetsContext';
 import { useAuth } from '../storage/authContext';
+import Toast from 'react-native-toast-message';
 
 // Константни стойности - може да ги направите динамични ако е необходимо
 const SCANNED_BY = '71271b35-dcce-4122-bf0e-1055cbeaf551'; // Примерно ID на потребител
@@ -91,11 +92,19 @@ export default function ScannerScreen({ navigation }) {
 
   const sendScannedData = async () => {
     if (!selectedBudget) {
-      Alert.alert('Избор на бюджет', 'Моля, изберете бюджет, преди да продължите.');
+      Toast.show({
+        type: 'error',
+        text1: 'Грешка',
+        text2: 'Моля, изберете бюджет, преди да продължите.'
+      });
       return;
     }
     if (!selectedStore) {
-      Alert.alert('Избор на магазин', 'Моля, изберете магазин, преди да продължите.');
+      Toast.show({
+        type: 'error',
+        text1: 'Грешка',
+        text2: 'Моля, изберете магазин, преди да продължите.'
+      });
       return;
     }
     if (isSendingScan) return;
@@ -113,13 +122,21 @@ export default function ScannerScreen({ navigation }) {
         headers: { 'Content-Type': 'application/json' },
       });
       console.log('Сървър отговори:', res.data);
-      Alert.alert('Успех', 'Касовата бележка е записана успешно!');
+      Toast.show({
+        type: 'success',
+        text1: 'Успех',
+        text2: 'Касовата бележка е записана успешно!'
+      });
       setModalVisible(false);
       navigation.navigate('Home');
     } catch (err) {
       console.error('Грешка при заявката:', err);
       const errorMessage = err.response?.data?.message || 'Неизвестна грешка при записване на бележката.';
-      Alert.alert('Грешка', errorMessage);
+      Toast.show({
+        type: 'error',
+        text1: 'Грешка',
+        text2: errorMessage
+      });
     } finally {
       setIsSendingScan(false);
     }
@@ -160,7 +177,6 @@ export default function ScannerScreen({ navigation }) {
         transparent={true}
         visible={modalVisible}
         onRequestClose={() => {
-          Alert.alert('Модалът е затворен.');
           setModalVisible(!modalVisible);
           restartScan(); // Затварянето на модала рестартира сканирането
         }}>

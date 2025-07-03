@@ -7,6 +7,8 @@ import loadingAnimation from '../assets/loading-animation.json';
 import Ionicons from '@expo/vector-icons/Ionicons';
 import api from '../utils/api';
 import { getColorByIndex } from '../utils/getColor';
+import Toast from 'react-native-toast-message';
+import DefaultLayout from '../components/DefaultLayout'
 
 export default function HomeScreen({ navigation }) {
     const { session, loadSessionFromStorage, clearSession, loading, displayName } = useAuth();
@@ -92,6 +94,11 @@ export default function HomeScreen({ navigation }) {
     const handleLogout = async () => {
         await api.post('/auth/logout')
         await clearSession();
+        Toast.show({
+            type: 'success',
+            text1: 'Успех',
+            text2: 'Успешно отписване от системата'
+        });
         navigation.replace('Login');
     };
 
@@ -111,180 +118,182 @@ export default function HomeScreen({ navigation }) {
     }
 
     return (
-        <View style={styles.container}>
-            {session?.user ? (
-                <View style={styles.containerHome}>
-                    {/* Header */}
-                    <View style={styles.header}>
-                        <View style={{ flexDirection: 'row', alignItems: 'center' }}>
-                            <View style={{ marginLeft: 12 }}>
-                                <Text style={styles.greeting}>Здравей{displayName && `, \n${displayName}`}</Text>
-                                <Text style={styles.dateText}>Днес {new Date().toLocaleDateString('bg-BG', { day: 'numeric', month: 'long' })}</Text>
+        <DefaultLayout>
+            <View style={styles.container}>
+                {session?.user ? (
+                    <View style={styles.containerHome}>
+                        {/* Header */}
+                        <View style={styles.header}>
+                            <View style={{ flexDirection: 'row', alignItems: 'center' }}>
+                                <View style={{ marginLeft: 12 }}>
+                                    <Text style={styles.greeting}>Здравей{displayName && `, \n${displayName}`}</Text>
+                                    <Text style={styles.dateText}>Днес {new Date().toLocaleDateString('bg-BG', { day: 'numeric', month: 'long' })}</Text>
+                                </View>
+                            </View>
+                            <View style={{ flexDirection: 'row', alignItems: 'center' }}>
+                                <TouchableOpacity style={styles.refreshButton} onPress={handleRefresh}>
+                                    <Ionicons name="refresh" size={20} color="#007AFF" />
+                                </TouchableOpacity>
+
+                                <TouchableOpacity style={styles.searchButton} onPress={handleLogout}>
+                                    <Ionicons name="log-out-outline" size={20} color="#FF2c2c" />
+                                </TouchableOpacity>
                             </View>
                         </View>
-                        <View style={{ flexDirection: 'row', alignItems: 'center' }}>
-                            <TouchableOpacity style={styles.refreshButton} onPress={handleRefresh}>
-                                <Ionicons name="refresh" size={20} color="#007AFF" />
-                            </TouchableOpacity>
 
-                            <TouchableOpacity style={styles.searchButton} onPress={handleLogout}>
-                                <Ionicons name="log-out-outline" size={20} color="#FF2c2c" />
-                            </TouchableOpacity>
-                        </View>
-                    </View>
+                        <ScrollView showsVerticalScrollIndicator={false}>
+                            <View styles={styles.mainActionsContainer}>
+                                <TouchableOpacity style={styles.challengeCard} onPress={() => navigation.navigate('Scanner')}>
+                                    <Text style={styles.challengeTitle}>Сканирай бележка</Text>
+                                    <Text style={styles.challengeSubtitle}>
+                                        Сканирай своята касова бележка всеки път след покупка
+                                    </Text>
+                                </TouchableOpacity>
+                                <TouchableOpacity style={[styles.challengeCard, styles.graphicsCard]} onPress={() => navigation.navigate('Charts')}>
+                                    <Text style={styles.challengeTitle}>Графики</Text>
+                                    <Text style={styles.challengeSubtitle}>
+                                        Разгледай визуализацията на твоите сметки
+                                    </Text>
+                                </TouchableOpacity>
+                            </View>
 
-                    <ScrollView showsVerticalScrollIndicator={false}>
-                        <View styles={styles.mainActionsContainer}>
-                            <TouchableOpacity style={styles.challengeCard} onPress={() => navigation.navigate('Scanner')}>
-                                <Text style={styles.challengeTitle}>Сканирай бележка</Text>
-                                <Text style={styles.challengeSubtitle}>
-                                    Сканирай своята касова бележка всеки път след покупка
-                                </Text>
-                            </TouchableOpacity>
-                            <TouchableOpacity style={[styles.challengeCard, styles.graphicsCard]} onPress={() => navigation.navigate('Charts')}>
-                                <Text style={styles.challengeTitle}>Графики</Text>
-                                <Text style={styles.challengeSubtitle}>
-                                    Разгледай визуализацията на твоите сметки
-                                </Text>
-                            </TouchableOpacity>
-                        </View>
-
-                        {/* Days selector */}
-                        <View style={styles.daysRow}>
-                            {days.map((day) => {
-                                const isSelected = day.dateString === selectedDate;
-                                return (
-                                    <TouchableOpacity
-                                        key={day.dateString}
-                                        onPress={() => setSelectedDate(day.dateString)}
-                                        style={{
-                                            padding: 10,
-                                            borderRadius: 10,
-                                            backgroundColor: isSelected ? '#6c63ff' : '#eee',
-                                            alignItems: 'center',
-                                            minWidth: 60,
-                                        }}
-                                    >
-                                        <Text style={{ color: isSelected ? '#fff' : '#333' }}>{day.label}</Text>
-                                        <Text style={{ fontWeight: 'bold', color: isSelected ? '#fff' : '#333' }}>
-                                            {day.dateString.slice(8)}{/* само деня */}
-                                        </Text>
-                                    </TouchableOpacity>
-                                );
-                            })}
-                        </View>
-
-                        <View style={styles.latestReceiptsContainer}>
-                            {loadingReceipts && <ActivityIndicator size="large" color="#6c63ff" />}
-                            {error && (
-                                <Text style={{ color: 'red', textAlign: 'center', marginVertical: 10 }}>
-                                    {error}
-                                </Text>
-                            )}
-                            {!loadingReceipts && !error && receipts.length === 0 && (
-                                <Text style={{ textAlign: 'center', color: '#666', marginTop: 20 }}>
-                                    Няма намерени сметки за избраната дата.
-                                </Text>
-                            )}
-
-                            {
-                                !loadingReceipts && !error && <ScrollView>
-                                    {receipts.map((r) => (
-                                        <View
-                                            key={r.id}
+                            {/* Days selector */}
+                            <View style={styles.daysRow}>
+                                {days.map((day) => {
+                                    const isSelected = day.dateString === selectedDate;
+                                    return (
+                                        <TouchableOpacity
+                                            key={day.dateString}
+                                            onPress={() => setSelectedDate(day.dateString)}
                                             style={{
-                                                backgroundColor: '#6c63ff',
-                                                marginBottom: 12,
+                                                padding: 10,
                                                 borderRadius: 10,
-                                                padding: 12,
+                                                backgroundColor: isSelected ? '#6c63ff' : '#eee',
+                                                alignItems: 'center',
+                                                minWidth: 60,
                                             }}
                                         >
-                                            <Text style={{ color: 'white', fontWeight: 'bold' }}>
-                                                {r.title || 'Без заглавие'}
+                                            <Text style={{ color: isSelected ? '#fff' : '#333' }}>{day.label}</Text>
+                                            <Text style={{ fontWeight: 'bold', color: isSelected ? '#fff' : '#333' }}>
+                                                {day.dateString.slice(8)}{/* само деня */}
                                             </Text>
-                                            <Text style={{ color: 'white' }}>Сума: {r.amount.toFixed(2)}</Text>
-                                            <Text style={{ color: 'white' }}>Дата: {r.date}</Text>
-                                            <Text style={{ color: 'white' }}>Час: {r.time}</Text>
-                                        </View>
-                                    ))}
-                                </ScrollView>
-                            }
-                        </View>
+                                        </TouchableOpacity>
+                                    );
+                                })}
+                            </View>
 
-                        <View style={styles.budgetsTitleHeader}>
-                            <Text style={styles.sectionTitle}>Твоите сметки</Text>
-                            <TouchableOpacity
-                                onPress={() => navigation.navigate('BudgetActions')}
-                                style={styles.addBudget}
-                            >
-                                <Ionicons name="add" size={16} color="#fff" />
-                            </TouchableOpacity>
-                        </View>
+                            <View style={styles.latestReceiptsContainer}>
+                                {loadingReceipts && <ActivityIndicator size="large" color="#6c63ff" />}
+                                {error && (
+                                    <Text style={{ color: 'red', textAlign: 'center', marginVertical: 10 }}>
+                                        {error}
+                                    </Text>
+                                )}
+                                {!loadingReceipts && !error && receipts.length === 0 && (
+                                    <Text style={{ textAlign: 'center', color: '#666', marginTop: 20 }}>
+                                        Няма намерени сметки за избраната дата.
+                                    </Text>
+                                )}
 
-                        <View style={styles.plansRow}>
-                            {budgets.map((budget, index) => {
-                                return (
-                                    <TouchableOpacity
-                                        key={budget.id}
-                                        style={[
-                                            styles.planCard,
-                                            { backgroundColor: getColorByIndex(index) }
-                                        ]}
-                                        onPress={() => navigation.navigate('BudgetDetails', { budget })}
-                                    >
-                                        <Text style={styles.planTitle}>{budget?.name}</Text>
-                                        <Text style={styles.planDetails}>
-                                            <Text style={styles.planDetailsText}>
-                                                Създаден на: {new Date(budget?.created_at).toLocaleDateString('bg-BG', {
-                                                    day: 'numeric',
-                                                    month: 'long'
-                                                })}
-                                            </Text>{"\n"}
-                                            <Text style={styles.planDetailsText}>
-                                                Последна активност: {new Date(budget?.lastReceiptDate).toLocaleDateString('bg-BG', {
-                                                    day: 'numeric',
-                                                    month: 'long'
-                                                })}
-                                            </Text>{"\n"}
-                                            <Text style={styles.planDetailsText}>
-                                                Потребители: {budget?.userCount}
-                                            </Text>{"\n"}
-                                        </Text>
-                                        <View style={styles.planTypeBadge}>
-                                            <Text style={{ color: '#fff' }}>Обща сума: {budget?.totalAmount.toFixed(2)}</Text>
-                                        </View>
-                                        {budget?.trainer && (
-                                            <View style={styles.trainerRow}>
-                                                <Image
-                                                    source={{ uri: budget?.trainerImage }}
-                                                    style={styles.trainerImage}
-                                                />
-                                                <Text style={{ color: '#444' }}>Trainer{"\n"}{budget?.trainer}</Text>
+                                {
+                                    !loadingReceipts && !error && <ScrollView>
+                                        {receipts.map((r) => (
+                                            <View
+                                                key={r.id}
+                                                style={{
+                                                    backgroundColor: '#6c63ff',
+                                                    marginBottom: 12,
+                                                    borderRadius: 10,
+                                                    padding: 12,
+                                                }}
+                                            >
+                                                <Text style={{ color: 'white', fontWeight: 'bold' }}>
+                                                    {r.title || 'Без заглавие'}
+                                                </Text>
+                                                <Text style={{ color: 'white' }}>Сума: {r.amount.toFixed(2)}</Text>
+                                                <Text style={{ color: 'white' }}>Дата: {r.date}</Text>
+                                                <Text style={{ color: 'white' }}>Час: {r.time}</Text>
                                             </View>
-                                        )}
+                                        ))}
+                                    </ScrollView>
+                                }
+                            </View>
 
-                                        {budget?.type === 'Light' && (
-                                            <View style={styles.socialButtons}>
-                                                <TouchableOpacity style={styles.socialIcon}><Text>📸</Text></TouchableOpacity>
-                                                <TouchableOpacity style={styles.socialIcon}><Text>🐦</Text></TouchableOpacity>
-                                                <TouchableOpacity style={styles.socialIcon}><Text>❤</Text></TouchableOpacity>
+                            <View style={styles.budgetsTitleHeader}>
+                                <Text style={styles.sectionTitle}>Твоите сметки</Text>
+                                <TouchableOpacity
+                                    onPress={() => navigation.navigate('BudgetActions')}
+                                    style={styles.addBudget}
+                                >
+                                    <Ionicons name="add" size={16} color="#fff" />
+                                </TouchableOpacity>
+                            </View>
+
+                            <View style={styles.plansRow}>
+                                {budgets.map((budget, index) => {
+                                    return (
+                                        <TouchableOpacity
+                                            key={budget.id}
+                                            style={[
+                                                styles.planCard,
+                                                { backgroundColor: getColorByIndex(index) }
+                                            ]}
+                                            onPress={() => navigation.navigate('BudgetDetails', { budget })}
+                                        >
+                                            <Text style={styles.planTitle}>{budget?.name}</Text>
+                                            <Text style={styles.planDetails}>
+                                                <Text style={styles.planDetailsText}>
+                                                    Създаден на: {new Date(budget?.created_at).toLocaleDateString('bg-BG', {
+                                                        day: 'numeric',
+                                                        month: 'long'
+                                                    })}
+                                                </Text>{"\n"}
+                                                <Text style={styles.planDetailsText}>
+                                                    Последна активност: {new Date(budget?.lastReceiptDate).toLocaleDateString('bg-BG', {
+                                                        day: 'numeric',
+                                                        month: 'long'
+                                                    })}
+                                                </Text>{"\n"}
+                                                <Text style={styles.planDetailsText}>
+                                                    Потребители: {budget?.userCount}
+                                                </Text>{"\n"}
+                                            </Text>
+                                            <View style={styles.planTypeBadge}>
+                                                <Text style={{ color: '#fff' }}>Обща сума: {budget?.totalAmount.toFixed(2)}</Text>
                                             </View>
-                                        )}
-                                    </TouchableOpacity>
-                                )
-                            })}
-                        </View>
-                    </ScrollView>
+                                            {budget?.trainer && (
+                                                <View style={styles.trainerRow}>
+                                                    <Image
+                                                        source={{ uri: budget?.trainerImage }}
+                                                        style={styles.trainerImage}
+                                                    />
+                                                    <Text style={{ color: '#444' }}>Trainer{"\n"}{budget?.trainer}</Text>
+                                                </View>
+                                            )}
 
-                </View>
-            ) : (
-                <>
-                    <Button title="Регистрация" onPress={() => navigation.navigate('Register')} />
-                    <View style={{ height: 20 }} />
-                    <Button title="Логване" onPress={() => navigation.navigate('Login')} />
-                </>
-            )}
-        </View>
+                                            {budget?.type === 'Light' && (
+                                                <View style={styles.socialButtons}>
+                                                    <TouchableOpacity style={styles.socialIcon}><Text>📸</Text></TouchableOpacity>
+                                                    <TouchableOpacity style={styles.socialIcon}><Text>🐦</Text></TouchableOpacity>
+                                                    <TouchableOpacity style={styles.socialIcon}><Text>❤</Text></TouchableOpacity>
+                                                </View>
+                                            )}
+                                        </TouchableOpacity>
+                                    )
+                                })}
+                            </View>
+                        </ScrollView>
+
+                    </View>
+                ) : (
+                    <>
+                        <Button title="Регистрация" onPress={() => navigation.navigate('Register')} />
+                        <View style={{ height: 20 }} />
+                        <Button title="Логване" onPress={() => navigation.navigate('Login')} />
+                    </>
+                )}
+            </View>
+        </DefaultLayout>
     );
 }
 

@@ -21,75 +21,76 @@ const Stack = createNativeStackNavigator();
 export default function AppNavigator() {
   return (
     <NavigationContainer>
-      <Stack.Navigator
-        initialRouteName="Home"
-        screenOptions={{
-          headerTitleAlign: 'center',
-          headerStyle: { backgroundColor: '#fff' },
-          headerTintColor: '#000',
-        }}
-      >
-        <Stack.Screen
-          name="Home"
-          component={HomeScreen}
-          options={{ title: 'Начало' }}
-        />
-        <Stack.Screen
-          name="Scanner"
-          component={ScannerScreen}
-          options={{ title: 'Сканирай бележка' }}
-        />
-        <Stack.Screen
-          name="Charts"
-          component={ChartScreen}
-          options={{ title: 'Графики' }}
-        />
-        <Stack.Screen
-          name="Budgets"
-          component={BudgetsScreen}
-          options={{ title: 'Моите сметки' }}
-        />
-        <Stack.Screen
-          name="BudgetDetails"
-          component={BudgetDetailsScreen}
-          options={{ title: 'Детайли' }}
-        />
-        <Stack.Screen
-          name="BudgetActions"
-          component={BudgetActionsScreen}
-          options={{ title: 'Нова сметка' }}
-        />
-        <Stack.Screen
-          name="BudgetCreateScreen"
-          component={BudgetCreateScreen}
-          options={{ title: 'Създаване на сметка' }}
-        />
-        <Stack.Screen
-          name="BudgetEdit"
-          component={BudgetEditScreen}
-          options={{ title: 'Редактиране на сметка' }}
-        />
-        <Stack.Screen
-          name="BudgetInviteScreen"
-          component={BudgetInviteScreen}
-          options={{ title: 'Покани потребител' }}
-        />
-        <Stack.Screen
-          name="BudgetJoinScreen"
-          component={BudgetJoinScreen}
-          options={{ title: 'Присъединяване към сметка' }}
-        />
-        <Stack.Screen
-          name="Register"
-          component={RegisterScreen}
-          options={{ title: 'Регистрация' }}
-        />
-        <Stack.Screen
-          name="Login"
-          component={LoginScreen}
-          options={{ title: 'Логване' }}
-        />
-      </Stack.Navigator>
+        <Stack.Navigator
+          initialRouteName="Home"
+          screenOptions={{
+            headerTitleAlign: 'center',
+            headerStyle: { backgroundColor: '#fff' },
+            headerTintColor: '#000',
+            headerShown: false
+          }}
+        >
+          <Stack.Screen
+            name="Home"
+            component={HomeScreen}
+            options={{ headerShown: false }}
+          />
+          <Stack.Screen
+            name="Scanner"
+            component={ScannerScreen}
+            options={{ headerShown: false }}
+          />
+          <Stack.Screen
+            name="Charts"
+            component={ChartScreen}
+            options={{ headerShown: false }}
+          />
+          <Stack.Screen
+            name="Budgets"
+            component={BudgetsScreen}
+            options={{ headerShown: false }}
+          />
+          <Stack.Screen
+            name="BudgetDetails"
+            component={BudgetDetailsScreen}
+            options={{ headerShown: false }}
+          />
+          <Stack.Screen
+            name="BudgetActions"
+            component={BudgetActionsScreen}
+            options={{ headerShown: false }}
+          />
+          <Stack.Screen
+            name="BudgetCreateScreen"
+            component={BudgetCreateScreen}
+            options={{ headerShown: false }}
+          />
+          <Stack.Screen
+            name="BudgetEdit"
+            component={BudgetEditScreen}
+            options={{ headerShown: false }}
+          />
+          <Stack.Screen
+            name="BudgetInviteScreen"
+            component={BudgetInviteScreen}
+            options={{ headerShown: false }}
+          />
+          <Stack.Screen
+            name="BudgetJoinScreen"
+            component={BudgetJoinScreen}
+            options={{ headerShown: false }}
+          />
+          <Stack.Screen
+            name="Register"
+            component={RegisterScreen}
+            options={{ headerShown: false }}
+          />
+          <Stack.Screen
+            name="Login"
+            component={LoginScreen}
+            options={{ headerShown: false }}
+          />
+        </Stack.Navigator>
     </NavigationContainer>
   );
 }

@@ -7,7 +7,9 @@
     "start": "expo start",
     "android": "expo run:android",
     "ios": "expo run:ios",
-    "web": "expo start --web"
+    "web": "expo start --web",
+    "check": "npx expo-doctor && npx expo prebuild --no-install --platform android",
+    "build:android": "eas build --platform android --profile preview"
   },
   "dependencies": {
     "@react-native-async-storage/async-storage": "2.1.2",
@@ -28,13 +30,14 @@
     "react-native-reanimated": "~3.17.4",
     "react-native-safe-area-context": "5.4.0",
     "react-native-screens": "~4.11.1",
-    "react-native-svg": "15.11.2"
+    "react-native-svg": "15.11.2",
+    "react-native-toast-message": "^2.3.3"
   },
   "devDependencies": {
     "@babel/core": "^7.20.0"
   },
   "overrides": {
-    "@expo/config-plugins": "10.0.0"
+    "@expo/config-plugins": "10.1.1"
   },
   "private": true
 }

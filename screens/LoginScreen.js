@@ -1,11 +1,12 @@
 import React, { useState } from 'react';
-import { View, Text, TextInput, Button, StyleSheet, Alert, ActivityIndicator } from 'react-native';
+import { View, Text, TextInput, Button, StyleSheet, ActivityIndicator } from 'react-native';
 import axios from 'axios';
 import { BASE_URL } from '../utils/api';
 import { saveSession } from '../utils/auth';
 import { useBudgets } from '../storage/budgetsContext';
 import { useAuth } from '../storage/authContext';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import Toast from 'react-native-toast-message';
 
 export default function LoginScreen({ navigation }) {
   const [email, setEmail] = useState('');
@@ -41,7 +42,11 @@ export default function LoginScreen({ navigation }) {
     } catch (err) {
       setLoading(false)
       console.error(err);
-      Alert.alert('Грешка при вход', err.response?.data?.error || 'Проблем със сървъра');
+      Toast.show({
+        type: 'error',
+        text1: 'Грешка',
+        text2: `Грешка при вход', ${err.response?.data?.error || 'Проблем със сървъра'}`
+      });
     }
   };
 

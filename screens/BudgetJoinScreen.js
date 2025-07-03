@@ -4,15 +4,14 @@ import {
   Text,
   TextInput,
   Button,
-  Alert,
   StyleSheet,
   TouchableOpacity,
-  Modal,
-  ActivityIndicator,
 } from 'react-native';
 import { CameraView, useCameraPermissions } from 'expo-camera';
 import api from '../utils/api';
 import { useBudgets } from '../storage/budgetsContext';
+import Toast from 'react-native-toast-message';
+import DefaultLayout from '../components/DefaultLayout';
 
 export default function BudgetJoinScreen({ navigation }) {
   const [permission, requestPermission] = useCameraPermissions();
@@ -50,10 +49,20 @@ export default function BudgetJoinScreen({ navigation }) {
 
   const handleJoin = async () => {
     if (!scannedCode) {
-      return Alert.alert('Грешка', 'Моля, първо сканирайте QR кода.');
+      Toast.show({
+        type: 'error',
+        text1: 'Грешка',
+        text2: 'Моля, първо сканирайте QR кода.'
+      });
+      return;
     }
     if (!displayName.trim()) {
-      return Alert.alert('Грешка', 'Моля въведете име за сметката.');
+      Toast.show({
+        type: 'error',
+        text1: 'Грешка',
+        text2: 'Моля въведете име за сметката.'
+      });
+      return;
     }
 
     setIsJoining(true);
@@ -63,13 +72,21 @@ export default function BudgetJoinScreen({ navigation }) {
         invite_code: scannedCode,
         display_name: displayName.trim(),
       });
-
-      Alert.alert('Успех', `Присъедини се към: ${res.data.budget.name}`);
+      Toast.show({
+        type: 'success',
+        text1: 'Успех',
+        text2: `Присъедини се към: ${res.data.budget.name}`
+      });
       fetchBudgets();
       navigation.goBack();
     } catch (err) {
       const msg = err.response?.data?.error || 'Проблем при присъединяване';
-      Alert.alert('Грешка', msg);
+      Toast.show({
+        type: 'error',
+        text1: 'Грешка',
+        text2: msg
+      });
+      return;
     } finally {
       setIsJoining(false);
     }
@@ -82,38 +99,40 @@ export default function BudgetJoinScreen({ navigation }) {
   };
 
   return (
-    <View style={styles.container}>
-      {showCamera ? (
-        <CameraView
-          style={styles.camera}
-          onBarcodeScanned={handleBarcodeScanned}
-          barcodeScannerSettings={{ barcodeTypes: ['qr'] }}
-        >
-          <View style={styles.instructionContainer}>
-            <Text style={styles.instructionText}>Насочи камерата към QR кода</Text>
+    <DefaultLayout>
+      <View style={styles.container}>
+        {showCamera ? (
+          <CameraView
+            style={styles.camera}
+            onBarcodeScanned={handleBarcodeScanned}
+            barcodeScannerSettings={{ barcodeTypes: ['qr'] }}
+          >
+            <View style={styles.instructionContainer}>
+              <Text style={styles.instructionText}>Насочи камерата към QR кода</Text>
+            </View>
+          </CameraView>
+        ) : (
+          <View style={styles.joinContainer}>
+            <Text style={styles.label}>QR код за покана:</Text>
+            <Text selectable style={styles.scannedCode}>{scannedCode}</Text>
+
+            <Text style={styles.label}>Вашето име в сметката:</Text>
+            <TextInput
+              style={styles.input}
+              value={displayName}
+              onChangeText={setDisplayName}
+              placeholder="Въведи име"
+            />
+
+            <Button title={isJoining ? "Присъединяване..." : "Присъедини се"} onPress={handleJoin} disabled={isJoining} />
+
+            <TouchableOpacity style={styles.rescanButton} onPress={restartScan}>
+              <Text style={styles.rescanText}>Сканирай отново</Text>
+            </TouchableOpacity>
           </View>
-        </CameraView>
-      ) : (
-        <View style={styles.joinContainer}>
-          <Text style={styles.label}>QR код за покана:</Text>
-          <Text selectable style={styles.scannedCode}>{scannedCode}</Text>
-
-          <Text style={styles.label}>Вашето име в сметката:</Text>
-          <TextInput
-            style={styles.input}
-            value={displayName}
-            onChangeText={setDisplayName}
-            placeholder="Въведи име"
-          />
-
-          <Button title={isJoining ? "Присъединяване..." : "Присъедини се"} onPress={handleJoin} disabled={isJoining} />
-
-          <TouchableOpacity style={styles.rescanButton} onPress={restartScan}>
-            <Text style={styles.rescanText}>Сканирай отново</Text>
-          </TouchableOpacity>
-        </View>
-      )}
-    </View>
+        )}
+      </View>
+    </DefaultLayout>
   );
 }
 
@@ -156,8 +175,8 @@ const styles = StyleSheet.create({
     textDecorationLine: 'underline',
   },
   centered: {
-    flex:1,
-    justifyContent:'center',
-    alignItems:'center'
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center'
   }
 });

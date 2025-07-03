@@ -1,7 +1,8 @@
 import React, { useState, useEffect } from 'react';
-import { View, Text, TextInput, Button, StyleSheet, Alert } from 'react-native';
+import { View, Text, TextInput, Button, StyleSheet } from 'react-native';
 import api from '../utils/api';
 import { useBudgets } from '../storage/budgetsContext';
+import Toast from 'react-native-toast-message';
 
 export default function BudgetEditScreen({ route, navigation }) {
     const { budget } = route.params; // очакваме да получим { budget } от предишния екран
@@ -24,7 +25,11 @@ export default function BudgetEditScreen({ route, navigation }) {
 
     const handleUpdate = async () => {
         if (!name.trim()) {
-            return Alert.alert('Грешка', 'Моля въведи име на бюджета.');
+            Toast.show({
+                type: 'error',
+                text1: 'Грешка',
+                text2: 'Моля въведи име на бюджета.'
+            });
         }
 
         try {
@@ -35,56 +40,67 @@ export default function BudgetEditScreen({ route, navigation }) {
                 dailyLimit
             });
 
-            Alert.alert('Успех', 'Бюджетът е обновен успешно!');
+            Toast.show({
+                type: 'success',
+                text1: 'Успех',
+                text2: 'Бюджетът е обновен успешно!'
+            });
+
             navigation.navigate('Home');
         } catch (err) {
             const msg = err.response?.data?.error || 'Грешка при обновяване на бюджета.';
-            Alert.alert('Грешка', msg);
+            Toast.show({
+                type: 'error',
+                text1: 'Грешка',
+                text2: msg
+            });
         } finally {
             fetchBudgets();
         }
     };
 
     return (
-        <View style={styles.container}>
-            {isOwner && (
-                <>
-                    <Text>Име на бюджета</Text>
-                    <TextInput
-                        style={styles.input}
-                        value={name}
-                        onChangeText={setName}
-                        placeholder="Пример: Семеен бюджет"
-                    />
+        <DefaultLayout>
+            <View style={styles.container}>
+                {isOwner && (
+                    <>
+                        <Text>Име на бюджета</Text>
+                        <TextInput
+                            style={styles.input}
+                            value={name}
+                            onChangeText={setName}
+                            placeholder="Пример: Семеен бюджет"
+                        />
 
-                    <Text>Описание (по избор)</Text>
-                    <TextInput
-                        style={styles.input}
-                        value={description}
-                        onChangeText={setDescription}
-                        placeholder="Описание на бюджета"
-                    />
+                        <Text>Описание (по избор)</Text>
+                        <TextInput
+                            style={styles.input}
+                            value={description}
+                            onChangeText={setDescription}
+                            placeholder="Описание на бюджета"
+                        />
 
-                    <Text>Дневен лимит (по избор)</Text>
-                    <TextInput
-                        style={styles.input}
-                        value={`${dailyLimit}`}
-                        onChangeText={setDailyLimit}
-                        placeholder="Дневен лимит"
-                          keyboardType="numeric"
-                    />
-                </>
-            )}
-            <Text>Вашето име в сметката</Text>
-            <TextInput
-                style={styles.input}
-                value={displayName}
-                onChangeText={setDisplayName}
-                autoCapitalize="none"
-            />
+                        <Text>Дневен лимит (по избор)</Text>
+                        <TextInput
+                            style={styles.input}
+                            value={`${dailyLimit}`}
+                            onChangeText={setDailyLimit}
+                            placeholder="Дневен лимит"
+                            keyboardType="numeric"
+                        />
+                    </>
+                )}
+                <Text>Вашето име в сметката</Text>
+                <TextInput
+                    style={styles.input}
+                    value={displayName}
+                    onChangeText={setDisplayName}
+                    autoCapitalize="none"
+                />
 
-            <Button title="Запази промените" onPress={handleUpdate} />
-        </View>
+                <Button title="Запази промените" onPress={handleUpdate} />
+            </View>
+        </DefaultLayout>
     );
 }
 

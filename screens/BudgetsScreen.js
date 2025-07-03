@@ -3,6 +3,7 @@ import { View, Text, Button, ScrollView, ActivityIndicator, StyleSheet, Touchabl
 import { Ionicons } from '@expo/vector-icons';
 import api from '../utils/api';
 import { useBudgets } from '../storage/budgetsContext';
+import DefaultLayout from '../components/DefaultLayout';
 
 export default function BudgetsScreen({ navigation }) {
     // const [budgets, setBudgets] = useState([]);
@@ -29,7 +30,7 @@ export default function BudgetsScreen({ navigation }) {
     // }
 
     return (
-        <>
+        <DefaultLayout>
             <ScrollView contentContainerStyle={styles.container}>
                 {budgets.map((budget) => (
                     <View key={budget.id} style={styles.budgetItem}>
@@ -47,7 +48,7 @@ export default function BudgetsScreen({ navigation }) {
             >
                 <Ionicons name="add" size={28} color="#fff" />
             </TouchableOpacity>
-        </>
+        </DefaultLayout>
     );
 }
 
