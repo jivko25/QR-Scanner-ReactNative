@@ -7,6 +7,25 @@
   "client": [
     {
       "client_info": {
+        "mobilesdk_app_id": "1:647004368623:android:24c0223de6c9bf69b7351a",
+        "android_client_info": {
+          "package_name": "com.jivko25.qrscannerapp"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyCRdGO4W2-yHrLRoK9Ks8uotKTK8Sal6AI"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    },
+    {
+      "client_info": {
         "mobilesdk_app_id": "1:647004368623:android:c3407625f2e26fb2b7351a",
         "android_client_info": {
           "package_name": "quack.scanner"
