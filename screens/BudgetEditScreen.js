@@ -3,6 +3,7 @@ import { View, Text, TextInput, Button, StyleSheet } from 'react-native';
 import api from '../utils/api';
 import { useBudgets } from '../storage/budgetsContext';
 import Toast from 'react-native-toast-message';
+import DefaultLayout from '../components/DefaultLayout';
 
 export default function BudgetEditScreen({ route, navigation }) {
     const { budget } = route.params; // очакваме да получим { budget } от предишния екран

@@ -140,9 +140,16 @@ export function ChartScreen() {
                     }));
 
                     const limitValue = budget.budgetDailyLimit; // лимитът в лева
-                    const limitLineData = chartData.map((point) => ({
+                    const weekDates = Array.from({ length: 7 }).map((_, i) => {
+                        const d = new Date(currentWeekStart);
+                        d.setDate(d.getDate() + i);
+                        return formatDateLocal(d);
+                    });
+
+                    const limitLineData = weekDates.map(dateStr => ({
                         value: limitValue,
-                        label: point.label,
+                        label: getWeekdayLabel(dateStr),
+                        date: dateStr,
                     }));
 
                     return (

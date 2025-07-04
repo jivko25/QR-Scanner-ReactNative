@@ -2,12 +2,15 @@ import React from 'react';
 import { SafeAreaView, View, StyleSheet } from 'react-native';
 import BottomNav from './BottomNavigation';
 
-export default function DefaultLayout({ children }) {
+export default function DefaultLayout({ children, showNavigation = true }) {
     return (
         <SafeAreaView style={styles.safeArea}>
             <View style={styles.container}>
                 {children}
-                <BottomNav />
+                {
+                    showNavigation &&
+                    <BottomNav />
+                }
             </View>
         </SafeAreaView>
     );

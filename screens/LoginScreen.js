@@ -1,12 +1,16 @@
 import React, { useState } from 'react';
-import { View, Text, TextInput, Button, StyleSheet, ActivityIndicator } from 'react-native';
+import { View, Text, TextInput, TouchableOpacity, StyleSheet, ActivityIndicator, KeyboardAvoidingView, Platform, ScrollView } from 'react-native';
 import axios from 'axios';
-import { BASE_URL } from '../utils/api';
-import { saveSession } from '../utils/auth';
-import { useBudgets } from '../storage/budgetsContext';
-import { useAuth } from '../storage/authContext';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import Toast from 'react-native-toast-message';
+import DefaultLayout from '../components/DefaultLayout';
+import LottieView from 'lottie-react-native';
+
+// Импортирай тук твоя лоти файл за логин, примерно:
+import loginAnimation from '../assets/login-animation.json';
+import { BASE_URL } from '../utils/api';
+import { useAuth } from '../storage/authContext';
+import { useBudgets } from '../storage/budgetsContext';
 
 export default function LoginScreen({ navigation }) {
   const [email, setEmail] = useState('');
@@ -17,16 +21,16 @@ export default function LoginScreen({ navigation }) {
 
   const handleLogin = async () => {
     try {
-      setLoading(true)
+      setLoading(true);
       const pushToken = await AsyncStorage.getItem('push_token');
 
       const res = await axios.post(`${BASE_URL}/auth/login`, {
         email,
         password,
-        pushToken
+        pushToken,
       });
 
-      setLoading(false)
+      setLoading(false);
 
       const token = res.data.session.access_token;
       const refresh_token = res.data.session.refresh_token;
@@ -40,61 +44,134 @@ export default function LoginScreen({ navigation }) {
 
       navigation.replace('Home');
     } catch (err) {
-      setLoading(false)
+      setLoading(false);
       console.error(err);
       Toast.show({
         type: 'error',
         text1: 'Грешка',
-        text2: `Грешка при вход', ${err.response?.data?.error || 'Проблем със сървъра'}`
+        text2: `Грешка при вход', ${err.response?.data?.error || 'Проблем със сървъра'}`,
       });
     }
   };
 
-      if (loading) {
-        return <ActivityIndicator style={{ marginTop: 40 }} />;
-    }
-
   return (
-    <View style={styles.container}>
-      <Text style={styles.label}>Имейл</Text>
-      <TextInput
-        style={styles.input}
-        value={email}
-        onChangeText={setEmail}
-        keyboardType="email-address"
-        autoCapitalize="none"
-      />
+    <DefaultLayout showNavigation={false}>
+      <KeyboardAvoidingView
+        style={{ flex: 1 }}
+        behavior={Platform.OS === 'ios' ? 'padding' : undefined}
+      >
+        <ScrollView
+          contentContainerStyle={styles.container}
+          keyboardShouldPersistTaps="handled"
+        >
+          <LottieView
+            source={loginAnimation}
+            autoPlay
+            loop
+            style={styles.lottie}
+          />
+          <Text style={styles.title}>Вход</Text>
 
-      <Text style={styles.label}>Парола</Text>
-      <TextInput
-        style={styles.input}
-        value={password}
-        onChangeText={setPassword}
-        secureTextEntry
-      />
-      
+          <Text style={styles.label}>Имейл</Text>
+          <TextInput
+            style={styles.input}
+            value={email}
+            onChangeText={setEmail}
+            keyboardType="email-address"
+            autoCapitalize="none"
+            editable={!loading}
+          />
 
-      <Button title="Вход" onPress={handleLogin} />
-      <Text style={styles.link} onPress={() => navigation.navigate('Register')}>
-        Нямаш акаунт? Регистрирай се
-      </Text>
-    </View>
+          <Text style={styles.label}>Парола</Text>
+          <TextInput
+            style={styles.input}
+            value={password}
+            onChangeText={setPassword}
+            secureTextEntry
+            editable={!loading}
+          />
+
+          <TouchableOpacity
+            style={[styles.button, loading && styles.buttonDisabled]}
+            onPress={handleLogin}
+            disabled={loading}
+          >
+            {loading ? (
+              <ActivityIndicator color="#fff" />
+            ) : (
+              <Text style={styles.buttonText}>Вход</Text>
+            )}
+          </TouchableOpacity>
+
+          <Text
+            style={styles.link}
+            onPress={() => navigation.navigate('Register')}
+          >
+            Нямаш акаунт? Регистрирай се
+          </Text>
+        </ScrollView>
+      </KeyboardAvoidingView>
+    </DefaultLayout>
   );
 }
 
 const styles = StyleSheet.create({
-  container: { padding: 20 },
-  label: { marginTop: 10 },
+  container: {
+    padding: 20,
+    paddingTop: 40,
+    flexGrow: 1,
+    justifyContent: 'center',
+    backgroundColor: '#f5f5f5',
+    paddingHorizontal: 24
+  },
+  lottie: {
+    width: 180,
+    height: 180,
+    alignSelf: 'center',
+    marginBottom: 16,
+  },
+  title: {
+    fontSize: 28,
+    fontWeight: '700',
+    marginBottom: 24,
+    color: '#6c63ff',
+    textAlign: 'center',
+  },
+  label: {
+    marginTop: 12,
+    fontWeight: '600',
+    color: '#333',
+  },
   input: {
+    backgroundColor: '#fff',
+    borderRadius: 8,
+    paddingHorizontal: 14,
+    paddingVertical: 12,
+    fontSize: 16,
+    marginVertical: 8,
     borderWidth: 1,
     borderColor: '#ccc',
-    padding: 10,
-    marginVertical: 5,
-    borderRadius: 5,
+  },
+  button: {
+    marginTop: 24,
+    backgroundColor: '#6c63ff',
+    paddingVertical: 14,
+    borderRadius: 35,
+    alignItems: 'center',
+  },
+  buttonDisabled: {
+    backgroundColor: '#a3a0f9',
+  },
+  buttonText: {
+    color: '#fff',
+    fontWeight: '700',
+    fontSize: 18,
   },
   link: {
-    marginTop: 15,
-    color: 'blue',
+    marginTop: 18,
+    color: '#6c63ff',
     textAlign: 'center',
+    fontWeight: '600',
+    textDecorationLine: 'underline',
   },
 });
