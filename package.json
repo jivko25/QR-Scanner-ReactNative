@@ -8,8 +8,10 @@
     "android": "expo run:android",
     "ios": "expo run:ios",
     "web": "expo start --web",
-    "check": "npx expo-doctor && npx expo prebuild --no-install --platform android",
-    "build:android": "eas build --platform android --profile preview"
+    "check:android": "npx expo-doctor && npx expo prebuild --no-install --platform android",
+    "build:android": "eas build --platform android --profile preview",
+    "check:ios": "npx expo-doctor && npx expo prebuild --no-install --platform ios",
+    "build:ios": "eas build --platform ios --profile preview"
   },
   "dependencies": {
     "@react-native-async-storage/async-storage": "2.1.2",
@@ -32,9 +34,10 @@
     "react-native-screens": "~4.11.1",
     "react-native-svg": "15.11.2",
     "react-native-toast-message": "^2.3.3",
-    "expo-notifications": "~0.31.3",
+    "expo-notifications": "~0.31.4",
     "expo-device": "~7.1.4",
-    "expo-constants": "~17.1.7"
+    "expo-constants": "~17.1.7",
+    "expo-image-picker": "~16.1.4"
   },
   "devDependencies": {
     "@babel/core": "^7.20.0"

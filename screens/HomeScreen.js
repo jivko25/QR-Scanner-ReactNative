@@ -29,7 +29,7 @@ export default function HomeScreen({ navigation }) {
     }
 
     return (
-        <View style={{ flex: 1, justifyContent: 'center', paddingHorizontal: 20, backgroundColor: '#f5f5f5' }}>
+        <View style={{ flex: 1, justifyContent: 'center', backgroundColor: '#f5f5f5' }}>
             {session?.user ? (
                 <AuthorizedUserHome
                     navigation={navigation}

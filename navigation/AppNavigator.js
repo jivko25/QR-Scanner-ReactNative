@@ -15,82 +15,100 @@ import BudgetJoinScreen from '../screens/BudgetJoinScreen';
 import { ChartScreen } from '../screens/ChartScreen';
 import BudgetEditScreen from '../screens/BudgetEditScreen';
 import BudgetInviteScreen from '../screens/BudgetInviteScreen';
+import QrCardDetailScreen from '../screens/QrCardDetailScreen';
+import QrCardCreateScreen from '../screens/QrCardCreateScreen';
+import QrCardsListScreen from '../screens/QrCardsListScreen';
 
 const Stack = createNativeStackNavigator();
 
 export default function AppNavigator() {
   return (
     <NavigationContainer>
-        <Stack.Navigator
-          initialRouteName="Home"
-          screenOptions={{
-            headerTitleAlign: 'center',
-            headerStyle: { backgroundColor: '#fff' },
-            headerTintColor: '#000',
-            headerShown: false
-          }}
-        >
-          <Stack.Screen
-            name="Home"
-            component={HomeScreen}
-            options={{ headerShown: false }}
-          />
-          <Stack.Screen
-            name="Scanner"
-            component={ScannerScreen}
-            options={{ headerShown: false }}
-          />
-          <Stack.Screen
-            name="Charts"
-            component={ChartScreen}
-            options={{ headerShown: false }}
-          />
-          <Stack.Screen
-            name="Budgets"
-            component={BudgetsScreen}
-            options={{ headerShown: false }}
-          />
-          <Stack.Screen
-            name="BudgetDetails"
-            component={BudgetDetailsScreen}
-            options={{ headerShown: false }}
-          />
-          <Stack.Screen
-            name="BudgetActions"
-            component={BudgetActionsScreen}
-            options={{ headerShown: false }}
-          />
-          <Stack.Screen
-            name="BudgetCreateScreen"
-            component={BudgetCreateScreen}
-            options={{ headerShown: false }}
-          />
-          <Stack.Screen
-            name="BudgetEdit"
-            component={BudgetEditScreen}
-            options={{ headerShown: false }}
-          />
-          <Stack.Screen
-            name="BudgetInviteScreen"
-            component={BudgetInviteScreen}
-            options={{ headerShown: false }}
-          />
-          <Stack.Screen
-            name="BudgetJoinScreen"
-            component={BudgetJoinScreen}
-            options={{ headerShown: false }}
-          />
-          <Stack.Screen
-            name="Register"
-            component={RegisterScreen}
-            options={{ headerShown: false }}
-          />
-          <Stack.Screen
-            name="Login"
-            component={LoginScreen}
-            options={{ headerShown: false }}
-          />
-        </Stack.Navigator>
+      <Stack.Navigator
+        initialRouteName="Home"
+        screenOptions={{
+          headerTitleAlign: 'center',
+          headerStyle: { backgroundColor: '#fff' },
+          headerTintColor: '#000',
+          headerShown: false
+        }}
+      >
+        <Stack.Screen
+          name="Home"
+          component={HomeScreen}
+          options={{ headerShown: false }}
+        />
+        <Stack.Screen
+          name="Scanner"
+          component={ScannerScreen}
+          options={{ headerShown: false }}
+        />
+        <Stack.Screen
+          name="Charts"
+          component={ChartScreen}
+          options={{ headerShown: false }}
+        />
+        <Stack.Screen
+          name="Budgets"
+          component={BudgetsScreen}
+          options={{ headerShown: false }}
+        />
+        <Stack.Screen
+          name="BudgetDetails"
+          component={BudgetDetailsScreen}
+          options={{ headerShown: false }}
+        />
+        <Stack.Screen
+          name="BudgetActions"
+          component={BudgetActionsScreen}
+          options={{ headerShown: false }}
+        />
+        <Stack.Screen
+          name="BudgetCreateScreen"
+          component={BudgetCreateScreen}
+          options={{ headerShown: false }}
+        />
+        <Stack.Screen
+          name="BudgetEdit"
+          component={BudgetEditScreen}
+          options={{ headerShown: false }}
+        />
+        <Stack.Screen
+          name="BudgetInviteScreen"
+          component={BudgetInviteScreen}
+          options={{ headerShown: false }}
+        />
+        <Stack.Screen
+          name="BudgetJoinScreen"
+          component={BudgetJoinScreen}
+          options={{ headerShown: false }}
+        />
+        <Stack.Screen
+          name="Register"
+          component={RegisterScreen}
+          options={{ headerShown: false }}
+        />
+        <Stack.Screen
+          name="Login"
+          component={LoginScreen}
+          options={{ headerShown: false }}
+        />
+        <Stack.Screen
+          name="QrCardsListScreen"
+          component={QrCardsListScreen}
+          options={{ headerShown: false }}
+        />
+        <Stack.Screen
+          name="QrCardCreateScreen"
+          component={QrCardCreateScreen}
+          options={{ headerShown: false }}
+        />
+        <Stack.Screen
+          name="QrCardDetailScreen"
+          component={QrCardDetailScreen}
+          options={{ headerShown: false }}
+        />
+      </Stack.Navigator>
     </NavigationContainer>
   );
 }

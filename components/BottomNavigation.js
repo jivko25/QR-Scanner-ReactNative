@@ -12,6 +12,7 @@ export default function BottomNav() {
     { name: 'Home', label: 'Начало', icon: 'home-outline' },
     { name: 'Scanner', label: 'Сканиране', icon: 'receipt-outline' },
     { name: 'Charts', label: 'Графики', icon: 'bar-chart-outline' },
+    { name: 'QrCardsListScreen', label: 'Карти', icon: 'card-outline' },
   ];
 
   return (
