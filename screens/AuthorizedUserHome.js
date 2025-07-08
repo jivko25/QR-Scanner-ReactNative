@@ -131,30 +131,50 @@ export default function HomeScreen({ navigation }) {
                         </View>
                         <View style={{ flexDirection: 'row', alignItems: 'center' }}>
                             <TouchableOpacity style={styles.refreshButton} onPress={handleRefresh}>
-                                <Ionicons name="refresh" size={20} color="#007AFF" />
+                                <Ionicons name="refresh" size={20} color="#52a447" />
                             </TouchableOpacity>
 
                             <TouchableOpacity style={styles.searchButton} onPress={handleLogout}>
                                 <Ionicons name="log-out-outline" size={20} color="#FF2c2c" />
                             </TouchableOpacity>
+
+                            <TouchableOpacity style={styles.settingsButton} onPress={() => navigation.navigate('Settings')}>
+                                <Ionicons name="settings-outline" size={18} color="#007AFF" />
+                            </TouchableOpacity>
                         </View>
                     </View>
 
                     <ScrollView showsVerticalScrollIndicator={false}>
-                        <View styles={styles.mainActionsContainer}>
-                            <TouchableOpacity style={styles.challengeCard} onPress={() => navigation.navigate('Scanner')}>
-                                <Text style={styles.challengeTitle}>Сканирай бележка</Text>
-                                <Text style={styles.challengeSubtitle}>
-                                    Сканирай своята касова бележка всеки път след покупка
-                                </Text>
+                        <View style={styles.quickActionsGrid}>
+                            <TouchableOpacity style={[styles.quickActionBox, { backgroundColor: '#6c63ff' }]} onPress={() => navigation.navigate('Scanner')}>
+                                <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
+                                    <Ionicons name="qr-code-outline" size={48} color="#fff" />
+                                    <Text style={[styles.quickActionText, { marginTop: 4 }]}>Сканирай касова бележка</Text>
+                                </View>
                             </TouchableOpacity>
-                            <TouchableOpacity style={[styles.challengeCard, styles.graphicsCard]} onPress={() => navigation.navigate('Charts')}>
-                                <Text style={styles.challengeTitle}>Графики</Text>
-                                <Text style={styles.challengeSubtitle}>
-                                    Разгледай визуализацията на твоите сметки
-                                </Text>
+
+                            <TouchableOpacity style={[styles.quickActionBox, { backgroundColor: '#52a447' }]} onPress={() => navigation.navigate('ManualExpenseScreen')}>
+                                <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
+                                    <Ionicons name="add-circle-outline" size={48} color="#fff" />
+                                    <Text style={styles.quickActionText}>Добави разход</Text>
+                                </View>
+                            </TouchableOpacity>
+
+                            <TouchableOpacity style={[styles.quickActionBox, { backgroundColor: '#ff9900' }]} onPress={() => navigation.navigate('Charts')}>
+                                <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
+                                    <Ionicons name="bar-chart-outline" size={48} color="#fff" />
+                                    <Text style={styles.quickActionText}>Графики</Text>
+                                </View>
+                            </TouchableOpacity>
+
+                            <TouchableOpacity style={[styles.quickActionBox, { backgroundColor: '#007AFF' }]} onPress={() => navigation.navigate('QrCardsListScreen')}>
+                                <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
+                                    <Ionicons name="card-outline" size={48} color="#fff" />
+                                    <Text style={styles.quickActionText}>Карти</Text>
+                                </View>
                             </TouchableOpacity>
                         </View>
+
 
                         {/* Days selector */}
                         <View style={styles.daysRow}>
@@ -260,23 +280,6 @@ export default function HomeScreen({ navigation }) {
                                         <View style={styles.planTypeBadge}>
                                             <Text style={{ color: '#fff' }}>Обща сума: {budget?.totalAmount.toFixed(2)}</Text>
                                         </View>
-                                        {budget?.trainer && (
-                                            <View style={styles.trainerRow}>
-                                                <Image
-                                                    source={{ uri: budget?.trainerImage }}
-                                                    style={styles.trainerImage}
-                                                />
-                                                <Text style={{ color: '#444' }}>Trainer{"\n"}{budget?.trainer}</Text>
-                                            </View>
-                                        )}
-
-                                        {budget?.type === 'Light' && (
-                                            <View style={styles.socialButtons}>
-                                                <TouchableOpacity style={styles.socialIcon}><Text>📸</Text></TouchableOpacity>
-                                                <TouchableOpacity style={styles.socialIcon}><Text>🐦</Text></TouchableOpacity>
-                                                <TouchableOpacity style={styles.socialIcon}><Text>❤</Text></TouchableOpacity>
-                                            </View>
-                                        )}
                                     </TouchableOpacity>
                                 )
                             })}
@@ -337,10 +340,13 @@ const styles = StyleSheet.create({
         color: '#666',
     },
     searchButton: {
-        padding: 8,
+        padding: 4,
     },
     refreshButton: {
-        padding: 8,
+        padding: 4,
+    },
+    settingsButton: {
+        padding: 4,
     },
     challengeCard: {
         backgroundColor: '#c4b8ff',
@@ -535,6 +541,39 @@ const styles = StyleSheet.create({
         justifyContent: 'space-between',
         padding: 10,
         gap: 10, // ако използваш React Native >= 0.71
+    },
+    quickActionsGrid: {
+        flexDirection: 'row',
+        flexWrap: 'wrap',
+        justifyContent: 'space-between',
+        paddingHorizontal: 16,
+        marginBottom: 30,
+        gap: 12,
+    },
+
+    quickActionBox: {
+        width: '47%',
+        aspectRatio: 1,
+        borderRadius: 20,
+        alignItems: 'center',
+        justifyContent: 'center',
+        flexDirection: 'column',
+        paddingVertical: 16,
+        paddingHorizontal: 0,
+        shadowColor: '#000',
+        shadowOpacity: 0.2,
+        shadowRadius: 6,
+        shadowOffset: { width: 0, height: 3 },
+        elevation: 4,
+    },
+
+
+    quickActionText: {
+        marginTop: 4,  // беше 8
+        fontSize: 14,
+        fontWeight: '600',
+        color: '#fff',
+        textAlign: 'center',
     },
 
 });

@@ -26,6 +26,7 @@
       },
       "edgeToEdgeEnabled": true,
       "permissions": [
+        "android.permission.CAMERA",
         "android.permission.CAMERA"
       ],
       "package": "com.jivko25.qrscannerapp",
@@ -38,6 +39,14 @@
       "eas": {
         "projectId": "664a034f-ec71-4ef2-a71f-aada4d6fb363"
       }
+    },
+    "updates": {
+      "fallbackToCacheTimeout": 0,
+      "checkAutomatically": "ON_LOAD",
+      "url": "https://u.expo.dev/664a034f-ec71-4ef2-a71f-aada4d6fb363"
+    },
+    "runtimeVersion": {
+      "policy": "appVersion"
     }
   }
 }

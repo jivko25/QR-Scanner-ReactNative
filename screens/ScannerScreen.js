@@ -7,9 +7,6 @@ import { useBudgets } from '../storage/budgetsContext';
 import { useAuth } from '../storage/authContext';
 import Toast from 'react-native-toast-message';
 
-// Константни стойности - може да ги направите динамични ако е необходимо
-const SCANNED_BY = '71271b35-dcce-4122-bf0e-1055cbeaf551'; // Примерно ID на потребител
-
 export default function ScannerScreen({ navigation }) {
   const [facing, setFacing] = useState('back');
   const [permission, requestPermission] = useCameraPermissions();

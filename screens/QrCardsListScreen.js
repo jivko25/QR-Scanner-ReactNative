@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useCallback, useEffect, useState } from 'react';
 import {
   View,
   Text,
@@ -7,7 +7,7 @@ import {
   ActivityIndicator,
   StyleSheet,
 } from 'react-native';
-import { useNavigation } from '@react-navigation/native';
+import { useFocusEffect, useNavigation } from '@react-navigation/native';
 import { Ionicons } from '@expo/vector-icons';
 import api from '../utils/api';
 import DefaultLayout from '../components/DefaultLayout';
@@ -18,13 +18,15 @@ export default function QrCardsListScreen() {
   const [loading, setLoading] = useState(true);
   const navigation = useNavigation();
 
-  useEffect(() => {
-    api
-      .get('/qr-card')
-      .then((res) => setCards(res.data))
-      .catch(console.error)
-      .finally(() => setLoading(false));
-  }, []);
+  useFocusEffect(
+    useCallback(() => {
+      setLoading(true);
+      api.get('/qr-card')
+        .then(res => setCards(res.data))
+        .catch(console.error)
+        .finally(() => setLoading(false));
+    }, [])
+  );
 
   if (loading) return <ActivityIndicator size="large" style={{ marginTop: 40 }} />;
 
@@ -38,11 +40,15 @@ export default function QrCardsListScreen() {
           renderItem={({ item, index }) => (
             <TouchableOpacity
               style={[styles.card, { backgroundColor: getColorByIndex(index) }]}
-              onPress={() =>
-                navigation.navigate('QrCardDetailScreen', { id: item.id })
-              }
+              onPress={() => navigation.navigate('QrCardDetailScreen', { id: item.id })}
             >
-              <Text style={styles.cardText}>{item.name}</Text>
+              <View style={styles.cardContent}>
+                <Ionicons name="qr-code-outline" size={32} color="#fff" style={{ marginRight: 12 }} />
+                <View>
+                  <Text style={styles.cardTitle}>{item.name}</Text>
+                  <Text style={styles.cardSubtitle}>Натисни за детайли</Text>
+                </View>
+              </View>
             </TouchableOpacity>
           )}
         />
@@ -66,19 +72,30 @@ const styles = StyleSheet.create({
     position: 'relative',
   },
   card: {
-    padding: 20,
-    marginBottom: 12,
-    borderRadius: 12,
+    padding: 16,
+    marginBottom: 16,
+    borderRadius: 16,
     shadowColor: '#000',
-    shadowOpacity: 0.1,
-    shadowOffset: { width: 0, height: 2 },
-    shadowRadius: 4,
-    elevation: 2,
+    shadowOpacity: 0.15,
+    shadowOffset: { width: 0, height: 4 },
+    shadowRadius: 6,
+    elevation: 5,
+    borderWidth: 1,
+    borderColor: 'rgba(255,255,255,0.1)',
   },
-  cardText: {
+  cardContent: {
+    flexDirection: 'row',
+    alignItems: 'center',
+  },
+  cardTitle: {
     fontSize: 18,
-    fontWeight: '600',
+    fontWeight: '700',
     color: '#fff',
+  },
+  cardSubtitle: {
+    fontSize: 14,
+    color: '#f2f2f2',
+    opacity: 0.85,
   },
   addButton: {
     flexDirection: 'row',

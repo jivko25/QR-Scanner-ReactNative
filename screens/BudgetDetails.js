@@ -112,6 +112,13 @@ export default function BudgetDetailsScreen({ route, navigation }) {
           <TouchableOpacity style={[styles.iconButton, styles.editButton]} onPress={() => navigation.navigate('BudgetEdit', { budget })}>
             <Ionicons name="create-outline" size={24} color="#fff" />
           </TouchableOpacity>
+
+          <TouchableOpacity
+            style={[styles.iconButton, styles.chartButton]}
+            onPress={() => navigation.navigate('BudgetChartScreen', { budget })}
+          >
+            <Ionicons name="stats-chart-outline" size={24} color="#fff" />
+          </TouchableOpacity>
         </View>
 
         <BudgetSpendingTable budgetId={budget.id} />
@@ -148,6 +155,12 @@ const styles = StyleSheet.create({
     color: '#fff',
     fontWeight: 'bold',
     fontSize: 16,
+  },
+  chartButton: {
+    backgroundColor: '#4caf50', // зелен цвят за графиката, може да смениш
+    borderRadius: 6,
+    alignItems: 'center',
+    justifyContent: 'center',
   },
   buttonsContainer: {
     marginTop: 20,

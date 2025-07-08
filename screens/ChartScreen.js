@@ -8,7 +8,6 @@ import {
     Button,
     ActivityIndicator,
     TouchableOpacity,
-    Dimensions,
 } from 'react-native';
 import { LineChart } from 'react-native-gifted-charts';
 import Ionicons from '@expo/vector-icons/Ionicons';
@@ -110,6 +109,7 @@ export function ChartScreen() {
                 </View>
 
                 {budgetsData.map((budget, index) => {
+                    // Сортираме разходите по дата
                     const sortedReceipts = [...budget.receipts].sort((a, b) => new Date(a.date) - new Date(b.date));
 
                     const weekStartStr = formatDateLocal(currentWeekStart);
@@ -117,40 +117,67 @@ export function ChartScreen() {
                     weekEnd.setDate(weekEnd.getDate() + 6);
                     const weekEndStr = formatDateLocal(weekEnd);
 
+                    // Филтрираме разходите за текущата седмица
                     const weekly = sortedReceipts.filter(item => {
                         const d = formatDateLocal(item.date);
                         return d >= weekStartStr && d <= weekEndStr;
                     });
 
+                    // Групираме по дата и сумираме сумите
                     const grouped = weekly.reduce((acc, it) => {
                         const key = formatDateLocal(it.date);
                         acc[key] = (acc[key] || 0) + parseFloat(it.amount);
                         return acc;
                     }, {});
 
-                    const sortedDates = Object.keys(grouped).sort((a, b) => new Date(a) - new Date(b));
-                    const labels = sortedDates.map(dateStr => getWeekdayLabel(dateStr));
-                    const amounts = sortedDates.map(dateStr => grouped[dateStr]);
-                    const total = amounts.reduce((s, v) => s + v, 0);
-
-                    const chartData = amounts.map((amount, i) => ({
-                        value: amount,
-                        label: labels[i],
-                        date: sortedDates[i],
-                    }));
-
-                    const limitValue = budget.budgetDailyLimit; // лимитът в лева
+                    // Вземаме всички дати от седмицата
                     const weekDates = Array.from({ length: 7 }).map((_, i) => {
                         const d = new Date(currentWeekStart);
                         d.setDate(d.getDate() + i);
                         return formatDateLocal(d);
                     });
 
-                    const limitLineData = weekDates.map(dateStr => ({
-                        value: limitValue,
-                        label: getWeekdayLabel(dateStr),
-                        date: dateStr,
+                    // Запълваме липсващите дати с 0
+                    const completeGrouped = {};
+                    weekDates.forEach(day => {
+                        completeGrouped[day] = grouped[day] || 0;
+                    });
+
+                    // Подготвяме данните за графиката
+                    const labels = weekDates.map(dateStr => getWeekdayLabel(dateStr));
+                    const amounts = weekDates.map(dateStr => completeGrouped[dateStr]);
+                    const total = amounts.reduce((s, v) => s + v, 0);
+
+                    const chartData = amounts.map((amount, i) => ({
+                        value: amount,
+                        label: labels[i],
+                        date: weekDates[i],
                     }));
+
+                    // Динамични лимити, коригирани според изразходваното
+                    const baseLimit = budget.budgetDailyLimit;
+                    const dynamicLimits = [];
+                    let leftover = 0;
+
+                    for (let i = 0; i < weekDates.length; i++) {
+                        const day = weekDates[i];
+                        const spent = completeGrouped[day] || 0;
+                        const currentLimit = baseLimit + leftover;
+                        dynamicLimits.push({
+                            value: currentLimit > 0 ? currentLimit : 0,  // лимит не може да е отрицателен
+                            label: getWeekdayLabel(day),
+                            date: day,
+                        });
+                        leftover = currentLimit - spent;
+                    }
+
+                    const weeklyLimit = budget.budgetDailyLimit * 7;
+                    const difference = total - weeklyLimit;
+                    const differenceText = difference >= 0
+                        ? `Превишение: +${difference.toFixed(2)} лв.`
+                        : `Оставащ лимит: ${Math.abs(difference).toFixed(2)} лв.`;
+
+                    const differenceStyle = difference >= 0 ? { color: '#e74c3c', fontWeight: '700' } : { color: '#27ae60', fontWeight: '700' };
 
                     return (
                         <View key={budget.id} style={chartStyles.budgetChartContainer}>
@@ -159,6 +186,10 @@ export function ChartScreen() {
                                 Разходи за периода: {weekStartStr} – {weekEndStr}
                             </Text>
                             <Text style={chartStyles.subtitle}>Общо: {total.toFixed(2)} лв.</Text>
+                            <Text style={[chartStyles.subtitle, differenceStyle]}>
+                                {differenceText}
+                            </Text>
+
 
                             {labels.length === 0 ? (
                                 <View style={chartStyles.noDataChartContainer}>
@@ -167,7 +198,7 @@ export function ChartScreen() {
                             ) : (
                                 <LineChart
                                     data={chartData}
-                                    data2={limitLineData}
+                                    data2={dynamicLimits}
                                     areaChart
                                     curved
                                     height={220}
@@ -190,9 +221,10 @@ export function ChartScreen() {
                                     startOpacity={0}
                                     endOpacity={0}
                                     onPress={(item) => {
+                                        const dayLimit = dynamicLimits.find(d => d.date === item.date)?.value ?? 0;
                                         Alert.alert(
                                             `Бюджет ${budget.name}`,
-                                            `Дата: ${item.date}\nСума: ${item.value.toFixed(2)} лв.`
+                                            `Дата: ${item.date}\nСума: ${item.value.toFixed(2)} лв.\nЛимит: ${dayLimit.toFixed(2)} лв.`
                                         );
                                     }}
                                     hideDataPoints={false}

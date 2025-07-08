@@ -18,6 +18,9 @@ import BudgetInviteScreen from '../screens/BudgetInviteScreen';
 import QrCardDetailScreen from '../screens/QrCardDetailScreen';
 import QrCardCreateScreen from '../screens/QrCardCreateScreen';
 import QrCardsListScreen from '../screens/QrCardsListScreen';
+import SettingsScreen from '../screens/SettingsScreen';
+import BudgetChartScreen from '../screens/BudgetChartScreen';
+import ManualExpenseScreen from '../screens/ManualExpenseScreen';
 
 const Stack = createNativeStackNavigator();
 
@@ -106,6 +109,21 @@ export default function AppNavigator() {
         <Stack.Screen
           name="QrCardDetailScreen"
           component={QrCardDetailScreen}
+          options={{ headerShown: false }}
+        />
+        <Stack.Screen
+          name="Settings"
+          component={SettingsScreen}
+          options={{ headerShown: false }}
+        />
+        <Stack.Screen
+          name="BudgetChartScreen"
+          component={BudgetChartScreen}
+          options={{ headerShown: false }}
+        />
+        <Stack.Screen
+          name="ManualExpenseScreen"
+          component={ManualExpenseScreen}
           options={{ headerShown: false }}
         />
       </Stack.Navigator>
