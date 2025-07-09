@@ -15,6 +15,9 @@ import { useAuth } from '../storage/authContext';
 import api from '../utils/api';
 import Toast from 'react-native-toast-message';
 import DefaultLayout from '../components/DefaultLayout';
+import Ionicons from '@expo/vector-icons/Ionicons';
+import { categoryMeta } from '../utils/storeCategories';
+
 
 export default function ManualExpenseScreen({ navigation }) {
   const { budgets } = useBudgets();
@@ -151,7 +154,14 @@ export default function ManualExpenseScreen({ navigation }) {
           </Picker>
         )}
 
+        <View style={styles.categoryContainer}>
+          {
+            selectedCategory && (
+              <Ionicons name={categoryMeta[selectedCategory].icon} size={24} color={categoryMeta[selectedCategory].color} />
+            )
+          }
         <Text style={styles.label}>Магазин</Text>
+        </View>
         {loadingStores ? (
           <ActivityIndicator />
         ) : (
@@ -203,4 +213,11 @@ const styles = StyleSheet.create({
     marginBottom: 16,
   },
   buttonContainer: { marginTop: 20 },
+  categoryContainer: {
+    flex: 1,
+    display: 'flex',
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 10,
+  }
 });
