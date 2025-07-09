@@ -21,6 +21,7 @@ import QrCardsListScreen from '../screens/QrCardsListScreen';
 import SettingsScreen from '../screens/SettingsScreen';
 import BudgetChartScreen from '../screens/BudgetChartScreen';
 import ManualExpenseScreen from '../screens/ManualExpenseScreen';
+import BrochuresListScreen from '../screens/BrouchuresList';
 
 const Stack = createNativeStackNavigator();
 
@@ -124,6 +125,11 @@ export default function AppNavigator() {
         <Stack.Screen
           name="ManualExpenseScreen"
           component={ManualExpenseScreen}
+          options={{ headerShown: false }}
+        />
+        <Stack.Screen
+          name="BrochuresListScreen"
+          component={BrochuresListScreen}
           options={{ headerShown: false }}
         />
       </Stack.Navigator>

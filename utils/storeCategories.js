@@ -1,5 +1,5 @@
 export const categoryMeta = {
-    'Хранителни': { icon: 'fast-food-outline', color: '#4caf50' },          // зелено
+    'Хранителни': { icon: 'cart-outline', color: '#4caf50' },          // зелено
     'Електроника': { icon: 'hardware-chip-outline', color: '#2196f3' }, // синьо
     'Зоомагазини': { icon: 'paw-outline', color: '#ff9800' },           // оранжево
     'Книги и подаръци': { icon: 'book-outline', color: '#9c27b0' },     // лилаво

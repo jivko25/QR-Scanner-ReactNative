@@ -69,6 +69,14 @@ export default function BudgetCreateScreen({ navigation }) {
           placeholder=""
           autoCapitalize="none"
         />
+        <Text>Дневен лимит</Text>
+        <TextInput
+          style={styles.input}
+          value={dailyLimit}
+          onChangeText={setDailyLimit}
+          placeholder=""
+          autoCapitalize="none"
+        />
 
         <Button title="Създай бюджет" onPress={handleCreate} />
       </View>
@@ -77,7 +85,7 @@ export default function BudgetCreateScreen({ navigation }) {
 }
 
 const styles = StyleSheet.create({
-  container: { padding: 20 },
+  container: { padding: 20, flex: 1 },
   input: {
     borderWidth: 1,
     borderColor: '#ccc',

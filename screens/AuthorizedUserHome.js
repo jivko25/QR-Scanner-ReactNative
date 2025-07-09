@@ -9,6 +9,7 @@ import api from '../utils/api';
 import { getColorByIndex } from '../utils/getColor';
 import Toast from 'react-native-toast-message';
 import DefaultLayout from '../components/DefaultLayout'
+import { categoryMeta } from '../utils/storeCategories';
 
 export default function HomeScreen({ navigation }) {
     const { session, loadSessionFromStorage, clearSession, loading, displayName } = useAuth();
@@ -62,6 +63,9 @@ export default function HomeScreen({ navigation }) {
             try {
                 // Тук трябва да подмениш URL с твоя бекенд, ако е различен
                 const response = await api.get(`/receipt/latest?date=${selectedDate}`);
+
+                console.log(response.data.receipts[0]);
+
 
                 setReceipts(response.data.receipts || []);
             } catch (e) {
@@ -145,34 +149,47 @@ export default function HomeScreen({ navigation }) {
                     </View>
 
                     <ScrollView showsVerticalScrollIndicator={false}>
-                        <View style={styles.quickActionsGrid}>
-                            <TouchableOpacity style={[styles.quickActionBox, { backgroundColor: '#6c63ff' }]} onPress={() => navigation.navigate('Scanner')}>
-                                <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
-                                    <Ionicons name="qr-code-outline" size={48} color="#fff" />
-                                    <Text style={[styles.quickActionText, { marginTop: 4 }]}>Сканирай касова бележка</Text>
-                                </View>
-                            </TouchableOpacity>
+                        <View style={styles.quckActionsWrapper}>
+                            {/* Ред 1: 3 бутона */}
+                            <View style={[styles.quickActionsRow, { marginBottom: 12 }]}>
+                                <TouchableOpacity style={[styles.quickActionBox, { backgroundColor: '#d63384' }]} onPress={() => navigation.navigate('BrochuresListScreen')}>
+                                    <View style={styles.quickActionInner}>
+                                        <Ionicons name="newspaper-outline" size={36} color="#fff" />
+                                        <Text style={styles.quickActionText}>Брошури</Text>
+                                    </View>
+                                </TouchableOpacity>
 
-                            <TouchableOpacity style={[styles.quickActionBox, { backgroundColor: '#52a447' }]} onPress={() => navigation.navigate('ManualExpenseScreen')}>
-                                <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
-                                    <Ionicons name="add-circle-outline" size={48} color="#fff" />
-                                    <Text style={styles.quickActionText}>Добави разход</Text>
-                                </View>
-                            </TouchableOpacity>
+                                <TouchableOpacity style={[styles.quickActionBox, { backgroundColor: '#52a447' }]} onPress={() => navigation.navigate('ManualExpenseScreen')}>
+                                    <View style={styles.quickActionInner}>
+                                        <Ionicons name="add-circle-outline" size={36} color="#fff" />
+                                        <Text style={styles.quickActionText}>Добави разход</Text>
+                                    </View>
+                                </TouchableOpacity>
 
-                            <TouchableOpacity style={[styles.quickActionBox, { backgroundColor: '#ff9900' }]} onPress={() => navigation.navigate('Charts')}>
-                                <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
-                                    <Ionicons name="bar-chart-outline" size={48} color="#fff" />
-                                    <Text style={styles.quickActionText}>Графики</Text>
-                                </View>
-                            </TouchableOpacity>
+                                <TouchableOpacity style={[styles.quickActionBox, { backgroundColor: '#ff9900' }]} onPress={() => navigation.navigate('Charts')}>
+                                    <View style={styles.quickActionInner}>
+                                        <Ionicons name="bar-chart-outline" size={36} color="#fff" />
+                                        <Text style={styles.quickActionText}>Графики</Text>
+                                    </View>
+                                </TouchableOpacity>
+                            </View>
 
-                            <TouchableOpacity style={[styles.quickActionBox, { backgroundColor: '#007AFF' }]} onPress={() => navigation.navigate('QrCardsListScreen')}>
-                                <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
-                                    <Ionicons name="card-outline" size={48} color="#fff" />
-                                    <Text style={styles.quickActionText}>Карти</Text>
-                                </View>
-                            </TouchableOpacity>
+                            {/* Ред 2: 2 бутона */}
+                            <View style={styles.quickActionsRow}>
+                                <TouchableOpacity style={[styles.quickActionBox, { backgroundColor: '#007AFF' }]} onPress={() => navigation.navigate('QrCardsListScreen')}>
+                                    <View style={styles.quickActionInner}>
+                                        <Ionicons name="card-outline" size={48} color="#fff" />
+                                        <Text style={styles.quickActionText}>Карти</Text>
+                                    </View>
+                                </TouchableOpacity>
+
+                                <TouchableOpacity style={[styles.quickActionBox, { backgroundColor: '#6c63ff' }]} onPress={() => navigation.navigate('Scanner')}>
+                                    <View style={styles.quickActionInner}>
+                                        <Ionicons name="qr-code-outline" size={40} color="#fff" />
+                                        <Text style={styles.quickActionText}>Сканирай</Text>
+                                    </View>
+                                </TouchableOpacity>
+                            </View>
                         </View>
 
 
@@ -216,24 +233,36 @@ export default function HomeScreen({ navigation }) {
 
                             {
                                 !loadingReceipts && !error && <ScrollView>
-                                    {receipts.map((r) => (
-                                        <View
-                                            key={r.id}
-                                            style={{
-                                                backgroundColor: '#6c63ff',
-                                                marginBottom: 12,
-                                                borderRadius: 10,
-                                                padding: 12,
-                                            }}
-                                        >
-                                            <Text style={{ color: 'white', fontWeight: 'bold' }}>
-                                                {r.title || 'Без заглавие'}
-                                            </Text>
-                                            <Text style={{ color: 'white' }}>Сума: {r.amount.toFixed(2)}</Text>
-                                            <Text style={{ color: 'white' }}>Дата: {r.date}</Text>
-                                            <Text style={{ color: 'white' }}>Час: {r.time}</Text>
-                                        </View>
-                                    ))}
+                                    {receipts.map((r) => {
+                                        const categoryName = r.stores?.store_categories?.name || 'Други';
+                                        const meta = categoryMeta[categoryName] || categoryMeta['Други'];
+
+                                        return (
+                                            <View
+                                                key={r.id}
+                                                style={{
+                                                    backgroundColor: meta.color,
+                                                    marginBottom: 12,
+                                                    borderRadius: 10,
+                                                    padding: 12,
+                                                    flexDirection: 'row',
+                                                    alignItems: 'center',
+                                                    gap: 12,
+                                                }}
+                                            >
+                                                <Ionicons name={meta.icon} size={32} color="white" />
+
+                                                <View style={{ flex: 1 }}>
+                                                    <Text style={{ color: 'white', fontWeight: 'bold' }}>
+                                                        {r.title || r.stores?.name || 'Без заглавие'}
+                                                    </Text>
+                                                    <Text style={{ color: 'white' }}>Сума: {r.amount.toFixed(2)} лв</Text>
+                                                    {/* <Text style={{ color: 'white' }}>Дата: {r.date}</Text>
+                                                    <Text style={{ color: 'white' }}>Час: {r.time}</Text> */}
+                                                </View>
+                                            </View>
+                                        );
+                                    })}
                                 </ScrollView>
                             }
                         </View>
@@ -575,5 +604,36 @@ const styles = StyleSheet.create({
         color: '#fff',
         textAlign: 'center',
     },
+    quickActionsRow: {
+        flexDirection: 'row',
+        justifyContent: 'space-between',
+        paddingHorizontal: 12,
+    },
+
+    quickActionBox: {
+        flex: 1,
+        height: 120,
+        marginHorizontal: 4,
+        borderRadius: 12,
+        padding: 8,
+    },
+
+    quickActionInner: {
+        flex: 1,
+        justifyContent: 'center',
+        alignItems: 'center',
+    },
+
+    quickActionText: {
+        color: '#fff',
+        fontSize: 14,
+        fontWeight: '500',
+        textAlign: 'center',
+        marginTop: 4,
+    },
+
+    quckActionsWrapper: {
+        marginBottom: 20
+    }
 
 });
