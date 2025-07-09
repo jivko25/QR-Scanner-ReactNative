@@ -21,10 +21,12 @@ export default function ManualExpenseScreen({ navigation }) {
   const { getSession } = useAuth();
 
   const [selectedBudget, setSelectedBudget] = useState(null);
-  const [selectedStore, setSelectedStore] = useState(null);
   const [stores, setStores] = useState([]);
+  const [groupedStores, setGroupedStores] = useState({});
+  const [categories, setCategories] = useState([]);
+  const [selectedCategory, setSelectedCategory] = useState(null);
+  const [selectedStore, setSelectedStore] = useState(null);
   const [loadingStores, setLoadingStores] = useState(false);
-
   const [amount, setAmount] = useState('');
 
   useEffect(() => {
@@ -36,8 +38,27 @@ export default function ManualExpenseScreen({ navigation }) {
       setLoadingStores(true);
       try {
         const res = await api.get('/store');
-        setStores(res.data);
-        setSelectedStore(res.data[0]?.id || null);
+        const storesData = res.data;
+
+        // Групиране по категории
+        const grouped = storesData.reduce((acc, store) => {
+          const category = store.store_categories?.name || 'Други';
+          if (!acc[category]) acc[category] = [];
+          acc[category].push(store);
+          return acc;
+        }, {});
+
+        // Подреждане на категориите, с "Други" накрая
+        const sortedCategories = Object.keys(grouped).sort((a, b) => {
+          if (a === 'Други') return 1;
+          if (b === 'Други') return -1;
+          return a.localeCompare(b);
+        });
+
+        setStores(storesData);
+        setGroupedStores(grouped);
+        setCategories(sortedCategories);
+        setSelectedCategory(sortedCategories[0] || null);
       } catch (e) {
         Toast.show({ type: 'error', text1: 'Грешка', text2: 'Неуспешно зареждане на магазини' });
       } finally {
@@ -47,23 +68,34 @@ export default function ManualExpenseScreen({ navigation }) {
     fetchStores();
   }, []);
 
+  useEffect(() => {
+    // Автоматично избира първия магазин от избраната категория
+    if (selectedCategory && groupedStores[selectedCategory]) {
+      const sortedStores = [...groupedStores[selectedCategory]].sort((a, b) => {
+        if (a.name === 'Друг') return 1;
+        if (b.name === 'Друг') return -1;
+        return a.name.localeCompare(b.name);
+      });
+      setSelectedStore(sortedStores[0]?.id || null);
+    }
+  }, [selectedCategory]);
+
   const submitExpense = async () => {
     if (!amount || !selectedBudget || !selectedStore) {
       Alert.alert('Моля, попълнете всички полета');
       return;
     }
-  
+
     const { user } = getSession();
-  
+
     try {
       await api.post('/receipt', {
-        // raw_code не се изпраща
-        amount: amount,            // изпращаме сумата отделно
+        amount: amount,
         budget_id: selectedBudget,
         scanned_by: user.id,
         store_id: selectedStore,
       });
-  
+
       Toast.show({
         type: 'success',
         text1: 'Добавен разход',
@@ -78,7 +110,6 @@ export default function ManualExpenseScreen({ navigation }) {
       });
     }
   };
-  
 
   return (
     <DefaultLayout>
@@ -105,6 +136,21 @@ export default function ManualExpenseScreen({ navigation }) {
           ))}
         </Picker>
 
+        <Text style={styles.label}>Категория на магазин</Text>
+        {loadingStores ? (
+          <ActivityIndicator />
+        ) : (
+          <Picker
+            selectedValue={selectedCategory}
+            style={styles.picker}
+            onValueChange={(value) => setSelectedCategory(value)}
+          >
+            {categories.map((category) => (
+              <Picker.Item key={category} label={category} value={category} />
+            ))}
+          </Picker>
+        )}
+
         <Text style={styles.label}>Магазин</Text>
         {loadingStores ? (
           <ActivityIndicator />
@@ -112,11 +158,20 @@ export default function ManualExpenseScreen({ navigation }) {
           <Picker
             selectedValue={selectedStore}
             style={styles.picker}
-            onValueChange={(item) => setSelectedStore(item)}
+            onValueChange={(value) => setSelectedStore(value)}
+            enabled={!!selectedCategory}
           >
-            {stores.map((store) => (
-              <Picker.Item key={store.id} label={store.name} value={store.id} />
-            ))}
+            {selectedCategory &&
+              groupedStores[selectedCategory]?.length > 0 &&
+              [...groupedStores[selectedCategory]]
+                .sort((a, b) => {
+                  if (a.name === 'Друг') return 1;
+                  if (b.name === 'Друг') return -1;
+                  return a.name.localeCompare(b.name);
+                })
+                .map((store) => (
+                  <Picker.Item key={store.id} label={store.name} value={store.id} />
+                ))}
           </Picker>
         )}
 

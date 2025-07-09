@@ -64,9 +64,6 @@ export default function HomeScreen({ navigation }) {
                 // Тук трябва да подмениш URL с твоя бекенд, ако е различен
                 const response = await api.get(`/receipt/latest?date=${selectedDate}`);
 
-                console.log(response.data.receipts[0]);
-
-
                 setReceipts(response.data.receipts || []);
             } catch (e) {
                 setError(e.message);
