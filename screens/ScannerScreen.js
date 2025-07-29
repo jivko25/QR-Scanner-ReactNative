@@ -111,14 +111,14 @@ export default function ScannerScreen({ navigation }) {
       });
       return;
     }
-    if (!selectedCategory || !selectedStore) {
-      Toast.show({
-        type: 'error',
-        text1: 'Грешка',
-        text2: 'Моля, изберете категория и магазин.',
-      });
-      return;
-    }
+    // if (!selectedCategory || !selectedStore) {
+    //   Toast.show({
+    //     type: 'error',
+    //     text1: 'Грешка',
+    //     text2: 'Моля, изберете категория и магазин.',
+    //   });
+    //   return;
+    // }
     if (isSendingScan) return;
 
     setIsSendingScan(true);

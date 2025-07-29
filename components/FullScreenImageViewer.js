@@ -1,7 +1,9 @@
 import React, { useState } from 'react';
-import { Pressable, Image, StyleSheet, View } from 'react-native';
-import ImageViewing from 'react-native-image-viewing';
-import { Ionicons } from '@expo/vector-icons'; // използваме икона от Expo
+import { Pressable, Image, StyleSheet, View, Modal } from 'react-native';
+import ImageViewer from 'react-native-reanimated-image-viewer';
+import { GestureHandlerRootView } from 'react-native-gesture-handler';
+import { Ionicons } from '@expo/vector-icons';
+import useImageDimensions from '../hooks/useImageDimensions';
 
 export default function FullScreenImageViewer({
   uri,
@@ -11,9 +13,10 @@ export default function FullScreenImageViewer({
   iconColor = '#555',
 }) {
   const [visible, setVisible] = useState(false);
+  const { width, height } = useImageDimensions(uri);
 
   return (
-    <View>
+    <View style={{ flex: 1 }}>
       <Pressable onPress={() => setVisible(true)}>
         {variant === 'image' ? (
           <Image source={{ uri }} style={[styles.thumbnail, thumbnailStyle]} />
@@ -22,12 +25,16 @@ export default function FullScreenImageViewer({
         )}
       </Pressable>
 
-      <ImageViewing
-        images={[{ uri }]}
-        imageIndex={0}
-        visible={visible}
-        onRequestClose={() => setVisible(false)}
-      />
+      <Modal visible={visible} onRequestClose={() => setVisible(false)} transparent={false}>
+        <GestureHandlerRootView style={{ flex: 1 }}>
+          <ImageViewer
+            imageUrl={uri}
+            width={width}
+            height={height}
+            onRequestClose={() => setVisible(false)}
+          />
+        </GestureHandlerRootView>
+      </Modal>
     </View>
   );
 }

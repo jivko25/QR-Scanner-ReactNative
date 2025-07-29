@@ -12,7 +12,7 @@ import DefaultLayout from '../components/DefaultLayout';
 import { Ionicons } from '@expo/vector-icons';
 import { useFocusEffect } from '@react-navigation/native';
 import ShoppingListItem from '../components/ShoppingListItem';
-import debounce from 'lodash/debounce';
+import debounce from '../utils/debounce';
 
 export default function ShoppingListDetailScreen({ route, navigation }) {
     const { id } = route.params;

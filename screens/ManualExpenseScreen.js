@@ -61,7 +61,7 @@ export default function ManualExpenseScreen({ navigation }) {
         setStores(storesData);
         setGroupedStores(grouped);
         setCategories(sortedCategories);
-        setSelectedCategory(sortedCategories[0] || null);
+        // setSelectedCategory(sortedCategories[0] || null);
       } catch (e) {
         Toast.show({ type: 'error', text1: 'Грешка', text2: 'Неуспешно зареждане на магазини' });
       } finally {
@@ -84,7 +84,7 @@ export default function ManualExpenseScreen({ navigation }) {
   }, [selectedCategory]);
 
   const submitExpense = async () => {
-    if (!amount || !selectedBudget || !selectedStore) {
+    if (!amount || !selectedBudget) {
       Alert.alert('Моля, попълнете всички полета');
       return;
     }
