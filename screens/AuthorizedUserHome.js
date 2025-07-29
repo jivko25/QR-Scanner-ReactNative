@@ -147,23 +147,22 @@ export default function HomeScreen({ navigation }) {
 
                     <ScrollView showsVerticalScrollIndicator={false}>
                         <View style={styles.quckActionsWrapper}>
-                            {/* Ред 1: 3 бутона */}
                             <View style={[styles.quickActionsRow, { marginBottom: 12 }]}>
-                                <TouchableOpacity style={[styles.quickActionBox, { backgroundColor: '#d63384' }]} onPress={() => navigation.navigate('BrochuresListScreen')}>
+                                <TouchableOpacity style={[styles.quickActionBox, { backgroundColor: '#E91E63' }]} onPress={() => navigation.navigate('BrochuresListScreen')}>
                                     <View style={styles.quickActionInner}>
                                         <Ionicons name="newspaper-outline" size={36} color="#fff" />
                                         <Text style={styles.quickActionText}>Брошури</Text>
                                     </View>
                                 </TouchableOpacity>
 
-                                <TouchableOpacity style={[styles.quickActionBox, { backgroundColor: '#52a447' }]} onPress={() => navigation.navigate('ManualExpenseScreen')}>
+                                <TouchableOpacity style={[styles.quickActionBox, { backgroundColor: '#4CAF50' }]} onPress={() => navigation.navigate('ManualExpenseScreen')}>
                                     <View style={styles.quickActionInner}>
                                         <Ionicons name="add-circle-outline" size={36} color="#fff" />
                                         <Text style={styles.quickActionText}>Добави разход</Text>
                                     </View>
                                 </TouchableOpacity>
 
-                                <TouchableOpacity style={[styles.quickActionBox, { backgroundColor: '#ff9900' }]} onPress={() => navigation.navigate('Charts')}>
+                                <TouchableOpacity style={[styles.quickActionBox, { backgroundColor: '#FF9800' }]} onPress={() => navigation.navigate('Charts')}>
                                     <View style={styles.quickActionInner}>
                                         <Ionicons name="bar-chart-outline" size={36} color="#fff" />
                                         <Text style={styles.quickActionText}>Графики</Text>
@@ -171,22 +170,29 @@ export default function HomeScreen({ navigation }) {
                                 </TouchableOpacity>
                             </View>
 
-                            {/* Ред 2: 2 бутона */}
                             <View style={styles.quickActionsRow}>
-                                <TouchableOpacity style={[styles.quickActionBox, { backgroundColor: '#007AFF' }]} onPress={() => navigation.navigate('QrCardsListScreen')}>
+                                <TouchableOpacity style={[styles.quickActionBox, { backgroundColor: '#2196F3' }]} onPress={() => navigation.navigate('QrCardsListScreen')}>
                                     <View style={styles.quickActionInner}>
                                         <Ionicons name="card-outline" size={48} color="#fff" />
                                         <Text style={styles.quickActionText}>Карти</Text>
                                     </View>
                                 </TouchableOpacity>
 
-                                <TouchableOpacity style={[styles.quickActionBox, { backgroundColor: '#6c63ff' }]} onPress={() => navigation.navigate('Scanner')}>
+                                <TouchableOpacity style={[styles.quickActionBox, { backgroundColor: '#00BCD4' }]} onPress={() => navigation.navigate('Scanner')}>
                                     <View style={styles.quickActionInner}>
                                         <Ionicons name="qr-code-outline" size={40} color="#fff" />
                                         <Text style={styles.quickActionText}>Сканирай</Text>
                                     </View>
                                 </TouchableOpacity>
+
+                                <TouchableOpacity style={[styles.quickActionBox, { backgroundColor: '#9C27B0' }]} onPress={() => navigation.navigate('ShoppingListsScreen')}>
+                                    <View style={styles.quickActionInner}>
+                                        <Ionicons name="list-outline" size={40} color="#fff" />
+                                        <Text style={styles.quickActionText}>Списъци</Text>
+                                    </View>
+                                </TouchableOpacity>
                             </View>
+
                         </View>
 
 

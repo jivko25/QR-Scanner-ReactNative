@@ -1,6 +1,6 @@
 import 'react-native-gesture-handler';
-import React, { useEffect, useRef, useState } from 'react';
-import { Platform } from 'react-native';
+import React, { useEffect, useRef } from 'react';
+import { Platform, Linking } from 'react-native';
 import AppNavigator from './navigation/AppNavigator';
 import { AuthProvider } from './storage/authContext';
 import { BudgetProvider } from './storage/budgetsContext';
@@ -25,6 +25,7 @@ async function registerForPushNotificationsAsync() {
     await Notifications.setNotificationChannelAsync('default', {
       name: 'default',
       importance: Notifications.AndroidImportance.MAX,
+      sound: 'duckquack.mp3',
       vibrationPattern: [0, 250, 250, 250],
       lightColor: '#FF231F7C',
     });
@@ -69,12 +70,21 @@ export default function App() {
   useEffect(() => {
     registerForPushNotificationsAsync();
 
+    // Когато пристигне нотификация докато приложението е отворено
     notificationListener.current = Notifications.addNotificationReceivedListener(notification => {
       console.log('Notification Received:', notification);
     });
 
+    // Когато потребителят натисне нотификация
     responseListener.current = Notifications.addNotificationResponseReceivedListener(response => {
       console.log('Notification Response:', response);
+      const data = response?.notification?.request?.content?.data;
+
+      if (data?.action === 'open_url' && data?.url) {
+        Linking.openURL(data.url).catch(err => {
+          console.error('❌ Неуспешно отваряне на линк:', err);
+        });
+      }
     });
 
     return () => {

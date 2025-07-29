@@ -157,7 +157,7 @@ export default function ManualExpenseScreen({ navigation }) {
         <View style={styles.categoryContainer}>
           {
             selectedCategory && (
-              <Ionicons name={categoryMeta[selectedCategory].icon} size={24} color={categoryMeta[selectedCategory].color} />
+              <Ionicons name={categoryMeta[selectedCategory]?.icon} size={24} color={categoryMeta[selectedCategory]?.color} />
             )
           }
         <Text style={styles.label}>Магазин</Text>

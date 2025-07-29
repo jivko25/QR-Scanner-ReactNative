@@ -128,7 +128,7 @@ export default function BrochuresListScreen() {
                 </View>
                 <View style={styles.infoContainer}>
                     <Text style={styles.store}>{item.store_name}</Text>
-                    <Text style={styles.date}>до {new Date(item.expires_at).toLocaleDateString('bg-BG')}</Text>
+                    <Text style={styles.date}>добавена: {new Date(item.created_at).toLocaleDateString('bg-BG')}</Text>
                     {item.archived && <Text style={styles.archived}>Архивирана</Text>}
                 </View>
                 <Ionicons name="arrow-forward" size={20} color="#fff" style={styles.icon} />

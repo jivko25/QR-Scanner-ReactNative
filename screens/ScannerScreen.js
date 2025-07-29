@@ -6,6 +6,8 @@ import api from '../utils/api';
 import { useBudgets } from '../storage/budgetsContext';
 import { useAuth } from '../storage/authContext';
 import Toast from 'react-native-toast-message';
+import Ionicons from '@expo/vector-icons/Ionicons';
+import { categoryMeta } from '../utils/storeCategories';
 
 export default function ScannerScreen({ navigation }) {
   const [facing, setFacing] = useState('back');
@@ -30,16 +32,16 @@ export default function ScannerScreen({ navigation }) {
       setGroupedStores({});
       return;
     }
-  
+
     const grouped = stores.reduce((acc, store) => {
       const categoryName = store.store_categories?.name || 'Други'; // Категорията
       const storeName = !store.store_categories ? 'Друг' : store.name;
-  
+
       if (!acc[categoryName]) acc[categoryName] = [];
       acc[categoryName].push({ ...store, name: storeName });
       return acc;
     }, {});
-  
+
     // Подреждане на всяка група така, че "Друг" да е последен
     Object.keys(grouped).forEach(category => {
       grouped[category].sort((a, b) => {
@@ -48,7 +50,7 @@ export default function ScannerScreen({ navigation }) {
         return a.name.localeCompare(b.name);
       });
     });
-  
+
     // Подреждаме категориите така, че "Други" да е последна
     const sortedGrouped = {};
     const sortedKeys = Object.keys(grouped).sort((a, b) => {
@@ -56,11 +58,11 @@ export default function ScannerScreen({ navigation }) {
       if (b === 'Други') return -1;
       return a.localeCompare(b);
     });
-  
+
     for (const key of sortedKeys) {
       sortedGrouped[key] = grouped[key];
     }
-  
+
     setGroupedStores(sortedGrouped);
   }, [stores]);
 
@@ -232,7 +234,17 @@ export default function ScannerScreen({ navigation }) {
                   ))}
                 </Picker>
 
-                <Text style={styles.inputLabel}>Изберете магазин</Text>
+                <View style={styles.categoryContainer}>
+                  {selectedCategory && categoryMeta[selectedCategory] && (
+                    <Ionicons
+                      name={categoryMeta[selectedCategory]?.icon}
+                      size={24}
+                      color={categoryMeta[selectedCategory]?.color}
+                      style={{ marginRight: 8 }}
+                    />
+                  )}
+                  <Text style={styles.inputLabel}>Изберете магазин</Text>
+                </View>
                 <Picker
                   selectedValue={selectedStore}
                   style={styles.picker}
@@ -334,4 +346,9 @@ const styles = StyleSheet.create({
     width: '100%',
     fontWeight: 'bold',
   },
+  categoryContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginBottom: 8,
+  }
 });

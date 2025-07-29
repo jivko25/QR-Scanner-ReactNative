@@ -22,6 +22,10 @@ import SettingsScreen from '../screens/SettingsScreen';
 import BudgetChartScreen from '../screens/BudgetChartScreen';
 import ManualExpenseScreen from '../screens/ManualExpenseScreen';
 import BrochuresListScreen from '../screens/BrouchuresList';
+import ShoppingListsScreen from '../screens/ShoppingListsScreen';
+import CreateShoppingListScreen from '../screens/CreateShoppingListScreen';
+import ShoppingListDetailScreen from '../screens/ShoppingListDetailScreen';
+import AddItemsFromImagesScreen from '../screens/AddItemsFromImagesScreen';
 
 const Stack = createNativeStackNavigator();
 
@@ -130,6 +134,26 @@ export default function AppNavigator() {
         <Stack.Screen
           name="BrochuresListScreen"
           component={BrochuresListScreen}
+          options={{ headerShown: false }}
+        />
+        <Stack.Screen
+          name="ShoppingListsScreen"
+          component={ShoppingListsScreen}
+          options={{ headerShown: false }}
+        />
+        <Stack.Screen
+          name="CreateShoppingListScreen"
+          component={CreateShoppingListScreen}
+          options={{ headerShown: false }}
+        />
+        <Stack.Screen
+          name="ShoppingListDetailScreen"
+          component={ShoppingListDetailScreen}
+          options={{ headerShown: false }}
+        />
+        <Stack.Screen
+          name="AddItemsFromImagesScreen"
+          component={AddItemsFromImagesScreen}
           options={{ headerShown: false }}
         />
       </Stack.Navigator>

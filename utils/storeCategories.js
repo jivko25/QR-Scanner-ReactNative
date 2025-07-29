@@ -29,5 +29,5 @@ export const categoryMeta = {
     'Тютюневи изделия и алкохол': { icon: 'wine-outline', color: '#a9746e' },
     'Бебета и деца': { icon: 'balloon-outline', color: '#f33' },
     'Комунални услуги': { icon: 'water-outline', color: '#03a9f4' },
-    'Горива': { icon: 'flame-outline', color: '#ff6f00' },
+    'Бензиностанция': { icon: 'flame-outline', color: '#ff6f00' },
   };
