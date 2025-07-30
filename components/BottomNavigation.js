@@ -1,19 +1,46 @@
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import { View, TouchableOpacity, Text, StyleSheet } from 'react-native';
 import { useNavigation, useRoute } from '@react-navigation/native';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 import { Ionicons } from '@expo/vector-icons';
+import { ALL_TABS } from '../utils/tabs';
+
+const STORAGE_KEY = 'selectedTabs';
 
 export default function BottomNav() {
   const navigation = useNavigation();
   const route = useRoute();
   const active = route.name;
 
-  const tabs = [
-    { name: 'Home', label: 'Начало', icon: 'home-outline' },
-    { name: 'Scanner', label: 'Сканиране', icon: 'receipt-outline' },
-    { name: 'Charts', label: 'Графики', icon: 'bar-chart-outline' },
-    { name: 'QrCardsListScreen', label: 'Карти', icon: 'card-outline' },
-  ];
+  const [tabs, setTabs] = useState([]);
+
+  useEffect(() => {
+    const loadTabs = async () => {
+      try {
+        const saved = await AsyncStorage.getItem(STORAGE_KEY);
+        if (saved) {
+          const selectedTabs = JSON.parse(saved);
+          // Филтрираме всички табове по избраните имена
+          const filtered = ALL_TABS.filter((tab) => selectedTabs.includes(tab.name));
+          if (filtered.length) {
+            setTabs(filtered);
+            return;
+          }
+        }
+        // Ако няма запазени настройки, ползваме всички по default
+        setTabs(ALL_TABS);
+      } catch (error) {
+        console.log('Грешка при зареждане на табове:', error);
+        setTabs(ALL_TABS);
+      }
+    };
+
+    loadTabs();
+  }, []);
+
+  if (tabs.length === 0) {
+    return null; // или loader
+  }
 
   return (
     <View style={styles.container}>
