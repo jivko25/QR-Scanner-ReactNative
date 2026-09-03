@@ -9,13 +9,18 @@ import {
     Text,
 } from 'react-native';
 import * as ImagePicker from 'expo-image-picker';
+import Toast from 'react-native-toast-message';
 import api from '../utils/api';
 import DefaultLayout from '../components/DefaultLayout';
 import { Ionicons } from '@expo/vector-icons';
+import { useOffline } from '../storage/offlineContext';
+import { upsertCachedQrCard } from '../utils/qrCardsCache';
 
 export default function QrCardCreateScreen({ navigation }) {
     const [name, setName] = useState('');
     const [image, setImage] = useState(null);
+    const [submitting, setSubmitting] = useState(false);
+    const { isOffline } = useOffline();
 
     const pickImage = async () => {
         const result = await ImagePicker.launchImageLibraryAsync({
@@ -29,8 +34,18 @@ export default function QrCardCreateScreen({ navigation }) {
     };
 
     const handleSubmit = async () => {
-        if (!name || !image)
+        if (isOffline) {
+            Toast.show({
+                type: 'info',
+                text1: 'Офлайн',
+                text2: 'Създаването на карта изисква интернет.',
+            });
+            return;
+        }
+
+        if (!name || !image) {
             return Alert.alert('Моля въведи име и избери снимка');
+        }
 
         const formData = new FormData();
         formData.append('name', name);
@@ -41,31 +56,50 @@ export default function QrCardCreateScreen({ navigation }) {
         });
 
         try {
-            await api.post('/qr-card', formData, {
+            setSubmitting(true);
+            const res = await api.post('/qr-card', formData, {
                 headers: { 'Content-Type': 'multipart/form-data' },
             });
+            if (res.data) {
+                await upsertCachedQrCard(res.data);
+            }
             navigation.goBack();
         } catch (err) {
             Alert.alert('Грешка', err.response?.data?.error || 'Грешка при създаване');
+        } finally {
+            setSubmitting(false);
         }
     };
 
     return (
         <DefaultLayout>
             <View style={styles.container}>
+                {isOffline ? (
+                    <View style={styles.offlineBox}>
+                        <Ionicons name="cloud-offline-outline" size={20} color="#546E7A" />
+                        <Text style={styles.offlineText}>
+                            Офлайн си — създаването на карта е недостъпно.
+                        </Text>
+                    </View>
+                ) : null}
+
                 <TextInput
                     placeholder="Име на карта"
                     value={name}
                     onChangeText={setName}
                     style={styles.input}
                     placeholderTextColor="#888"
+                    editable={!isOffline}
                 />
 
-                <TouchableOpacity onPress={pickImage} style={styles.button}>
+                <TouchableOpacity
+                    onPress={pickImage}
+                    style={[styles.button, isOffline && styles.disabled]}
+                    disabled={isOffline}
+                >
                     <View style={styles.iconTextContainer}>
                         <Ionicons name="image-outline" size={24} color="#fff" style={styles.icon} />
-                    <Text style={styles.buttonText}>
-                        Избери снимка</Text>
+                        <Text style={styles.buttonText}>Избери снимка</Text>
                     </View>
                 </TouchableOpacity>
 
@@ -77,10 +111,16 @@ export default function QrCardCreateScreen({ navigation }) {
                     />
                 )}
 
-                <TouchableOpacity onPress={handleSubmit} style={[styles.button, styles.submitButton]}>
+                <TouchableOpacity
+                    onPress={handleSubmit}
+                    style={[styles.button, styles.submitButton, (isOffline || submitting) && styles.disabled]}
+                    disabled={isOffline || submitting}
+                >
                     <View style={styles.iconTextContainer}>
                         <Ionicons name="save-outline" size={24} color="#fff" style={styles.icon} />
-                        <Text style={styles.buttonText}>Създай карта</Text>
+                        <Text style={styles.buttonText}>
+                            {submitting ? 'Запазване...' : 'Създай карта'}
+                        </Text>
                     </View>
                 </TouchableOpacity>
             </View>
@@ -95,7 +135,21 @@ const styles = StyleSheet.create({
         gap: 16,
         display: 'flex',
         flexDirection: 'column',
-        justifyContent: 'center'
+        justifyContent: 'center',
+    },
+    offlineBox: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        gap: 8,
+        backgroundColor: '#ECEFF1',
+        padding: 12,
+        borderRadius: 10,
+    },
+    offlineText: {
+        flex: 1,
+        color: '#546E7A',
+        fontWeight: '600',
+        fontSize: 13,
     },
     input: {
         borderWidth: 1,
@@ -114,6 +168,10 @@ const styles = StyleSheet.create({
     },
     submitButton: {
         backgroundColor: '#27ae60',
+    },
+    disabled: {
+        backgroundColor: '#95a5a6',
+        opacity: 0.85,
     },
     buttonText: {
         color: 'white',

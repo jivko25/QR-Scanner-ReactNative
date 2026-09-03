@@ -1,14 +1,14 @@
 import React, { useEffect, useState } from 'react';
-import { View, Text, Button, StyleSheet, ScrollView, Switch, Alert } from 'react-native';
+import { View, Text, Button, StyleSheet, ScrollView, Switch } from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import DefaultLayout from '../components/DefaultLayout';
 import Toast from 'react-native-toast-message';
-import { ALL_TABS } from '../utils/tabs';
+import { ALL_TABS, DEFAULT_TAB_NAMES, MAX_BOTTOM_TABS } from '../utils/tabs';
 
 const STORAGE_KEY = 'selectedTabs';
 
 export default function SettingsScreen() {
-  const [selectedTabs, setSelectedTabs] = useState([]);
+  const [selectedTabs, setSelectedTabs] = useState(DEFAULT_TAB_NAMES);
   const [saving, setSaving] = useState(false);
 
   useEffect(() => {
@@ -19,20 +19,30 @@ export default function SettingsScreen() {
     try {
       const saved = await AsyncStorage.getItem(STORAGE_KEY);
       if (saved) {
-        setSelectedTabs(JSON.parse(saved));
-      } else {
-        // По подразбиране - всички табове избрани
-        setSelectedTabs(ALL_TABS.map((t) => t.name));
+        const parsed = JSON.parse(saved);
+        if (Array.isArray(parsed) && parsed.length > 0) {
+          // Пазим реда от ALL_TABS и ограничаваме до максимума
+          const ordered = ALL_TABS.map((t) => t.name).filter((name) =>
+            parsed.includes(name)
+          );
+          setSelectedTabs(
+            ordered.length > 0
+              ? ordered.slice(0, MAX_BOTTOM_TABS)
+              : DEFAULT_TAB_NAMES
+          );
+          return;
+        }
       }
+      setSelectedTabs(DEFAULT_TAB_NAMES);
     } catch (e) {
       console.log('Грешка при зареждане на настройки', e);
+      setSelectedTabs(DEFAULT_TAB_NAMES);
     }
   };
 
   const toggleTab = (tabName) => {
     setSelectedTabs((prev) => {
       if (prev.includes(tabName)) {
-        // Ако изключваме, винаги позволяваме, но поне 1 таб трябва да остане избран
         if (prev.length === 1) {
           Toast.show({
             text1: 'Внимание',
@@ -42,30 +52,35 @@ export default function SettingsScreen() {
           return prev;
         }
         return prev.filter((t) => t !== tabName);
-      } else {
-        // Ако включваме - проверяваме дали не превишаваме лимита
-        if (prev.length >= 4) {
-          console.log('prev', prev);
-          
-          Toast.show({
-            text1: 'Внимание',
-            text2: 'Можеш да избереш максимум 4 таба.',
-            type: 'error',
-          });
-          return prev;
-        }
-        return [...prev, tabName];
       }
+
+      if (prev.length >= MAX_BOTTOM_TABS) {
+        Toast.show({
+          text1: 'Внимание',
+          text2: `Можеш да избереш максимум ${MAX_BOTTOM_TABS} таба.`,
+          type: 'error',
+        });
+        return prev;
+      }
+
+      // Запазваме реда според ALL_TABS
+      const next = [...prev, tabName];
+      return ALL_TABS.map((t) => t.name).filter((name) => next.includes(name));
     });
   };
 
   const saveSettings = async () => {
     setSaving(true);
     try {
-      await AsyncStorage.setItem(STORAGE_KEY, JSON.stringify(selectedTabs));
+      const ordered = ALL_TABS.map((t) => t.name)
+        .filter((name) => selectedTabs.includes(name))
+        .slice(0, MAX_BOTTOM_TABS);
+
+      await AsyncStorage.setItem(STORAGE_KEY, JSON.stringify(ordered));
+      setSelectedTabs(ordered);
       Toast.show({
         text1: 'Успешно',
-        text2: 'Настройките са запазени. Рестартирай приложението, за да видиш промените.',
+        text2: 'Настройките са запазени.',
         type: 'success',
       });
     } catch (e) {
@@ -83,7 +98,9 @@ export default function SettingsScreen() {
   return (
     <DefaultLayout>
       <ScrollView contentContainerStyle={styles.container}>
-        <Text style={styles.title}>Избери табове за долното меню (максимум 4)</Text>
+        <Text style={styles.title}>
+          Избери табове за долното меню (максимум {MAX_BOTTOM_TABS})
+        </Text>
 
         {ALL_TABS.map((tab) => (
           <View key={tab.name} style={styles.row}>
@@ -97,7 +114,11 @@ export default function SettingsScreen() {
           </View>
         ))}
 
-        <Button title={saving ? 'Записване...' : 'Запази'} onPress={saveSettings} disabled={saving} />
+        <Button
+          title={saving ? 'Записване...' : 'Запази'}
+          onPress={saveSettings}
+          disabled={saving}
+        />
       </ScrollView>
     </DefaultLayout>
   );

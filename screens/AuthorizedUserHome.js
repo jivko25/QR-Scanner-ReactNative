@@ -11,25 +11,17 @@ import Toast from 'react-native-toast-message';
 import DefaultLayout from '../components/DefaultLayout'
 import { categoryMeta } from '../utils/storeCategories';
 import StepGuide from '../components/StepGuide';
+import { useOffline } from '../storage/offlineContext';
 
 export default function HomeScreen({ navigation }) {
-    const { session, loadSessionFromStorage, clearSession, loading, displayName } = useAuth();
-    const [checkedSession, setCheckedSession] = useState(true);
-    const { fetchBudgets, loading: loadingBudgets, error: errorBudgets, budgets } = useBudgets();
+    const { session, clearSession, loading, displayName } = useAuth();
+    const { fetchBudgets, budgets } = useBudgets();
+    const { isOffline } = useOffline();
     const [days, setDays] = useState([]);
     const [selectedDate, setSelectedDate] = useState(null);
     const [loadingReceipts, setLoadingReceipts] = useState(false);
     const [receipts, setReceipts] = useState([]);
     const [error, setError] = useState(null);
-
-    useEffect(() => {
-        const initialize = async () => {
-            await loadSessionFromStorage(); // независимо дали има session в момента
-            setCheckedSession(true);
-        };
-
-        initialize();
-    }, []);
 
     useEffect(() => {
         const generateLastDays = (numDays) => {
@@ -58,13 +50,18 @@ export default function HomeScreen({ navigation }) {
         if (!selectedDate || !session?.user) return;
 
         const fetchReceipts = async () => {
+            if (isOffline) {
+                setError('Няма интернет връзка');
+                setReceipts([]);
+                setLoadingReceipts(false);
+                return;
+            }
+
             setLoadingReceipts(true);
             setError(null);
 
             try {
-                // Тук трябва да подмениш URL с твоя бекенд, ако е различен
                 const response = await api.get(`/receipt/latest?date=${selectedDate}`);
-
                 setReceipts(response.data.receipts || []);
             } catch (e) {
                 setError(e.message);
@@ -74,14 +71,23 @@ export default function HomeScreen({ navigation }) {
         };
 
         fetchReceipts();
-    }, [selectedDate, session]);
+    }, [selectedDate, session, isOffline]);
 
     const handleRefresh = async () => {
+        if (isOffline) {
+            Toast.show({
+                type: 'info',
+                text1: 'Офлайн',
+                text2: 'Обновяването изисква интернет.',
+            });
+            return;
+        }
+
         setError(null);
         setLoadingReceipts(true);
 
         try {
-            await fetchBudgets();            // презареди бюджетите
+            await fetchBudgets();
             if (selectedDate && session?.user) {
                 const response = await api.get(`/receipt/latest?date=${selectedDate}`);
                 setReceipts(response.data.receipts || []);
@@ -94,18 +100,25 @@ export default function HomeScreen({ navigation }) {
     };
 
     const handleLogout = async () => {
-        await api.post('/auth/logout')
-        await clearSession();
-        Toast.show({
-            type: 'success',
-            text1: 'Успех',
-            text2: 'Успешно отписване от системата'
-        });
-        navigation.replace('Home');
+        try {
+            if (!isOffline) {
+                await api.post('/auth/logout');
+            }
+        } catch (e) {
+            console.warn('Logout API грешка:', e.message);
+        } finally {
+            await clearSession();
+            Toast.show({
+                type: 'success',
+                text1: 'Успех',
+                text2: 'Успешно отписване от системата',
+            });
+            navigation.replace('Home');
+        }
     };
 
-    // Ако още зареждаме сесията (от AsyncStorage или бекенд)
-    if (loadingBudgets || loading) {
+    // Ако още зареждаме сесията
+    if (loading) {
         return (
             <View style={styles.loadingContainer}>
                 <LottieView
@@ -154,52 +167,81 @@ export default function HomeScreen({ navigation }) {
 
                     <ScrollView showsVerticalScrollIndicator={false}>
                         <View style={styles.quckActionsWrapper}>
-                            <View style={[styles.quickActionsRow, { marginBottom: 12 }]}>
-                                <TouchableOpacity style={[styles.quickActionBox, { backgroundColor: '#E91E63' }]} onPress={() => navigation.navigate('BrochuresListScreen')}>
+                            <View style={[styles.quickActionsRow, { marginBottom: 10 }]}>
+                                <TouchableOpacity
+                                    style={[styles.quickActionLarge, { backgroundColor: '#AD1457' }]}
+                                    onPress={() => navigation.navigate('BrochureProductsSearchScreen')}
+                                >
                                     <View style={styles.quickActionInner}>
-                                        <Ionicons name="newspaper-outline" size={36} color="#fff" />
+                                        <Ionicons name="pricetags-outline" size={34} color="#fff" />
+                                        <Text style={styles.quickActionText}>Промоции</Text>
+                                    </View>
+                                </TouchableOpacity>
+
+                                <TouchableOpacity
+                                    style={[styles.quickActionLarge, { backgroundColor: '#E91E63' }]}
+                                    onPress={() => navigation.navigate('BrochuresListScreen')}
+                                >
+                                    <View style={styles.quickActionInner}>
+                                        <Ionicons name="newspaper-outline" size={34} color="#fff" />
                                         <Text style={styles.quickActionText}>Брошури</Text>
                                     </View>
                                 </TouchableOpacity>
+                            </View>
 
-                                <TouchableOpacity style={[styles.quickActionBox, { backgroundColor: '#4CAF50' }]} onPress={() => navigation.navigate('ManualExpenseScreen')}>
+                            <View style={[styles.quickActionsRow, { marginBottom: 10 }]}>
+                                <TouchableOpacity
+                                    style={[styles.quickActionLarge, { backgroundColor: '#2196F3' }]}
+                                    onPress={() => navigation.navigate('QrCardsListScreen')}
+                                >
                                     <View style={styles.quickActionInner}>
-                                        <Ionicons name="add-circle-outline" size={36} color="#fff" />
-                                        <Text style={styles.quickActionText}>Добави разход</Text>
+                                        <Ionicons name="card-outline" size={34} color="#fff" />
+                                        <Text style={styles.quickActionText}>Карти</Text>
                                     </View>
                                 </TouchableOpacity>
 
-                                <TouchableOpacity style={[styles.quickActionBox, { backgroundColor: '#FF9800' }]} onPress={() => navigation.navigate('Charts')}>
+                                <TouchableOpacity
+                                    style={[styles.quickActionLarge, { backgroundColor: '#00BCD4' }]}
+                                    onPress={() => navigation.navigate('Scanner')}
+                                >
                                     <View style={styles.quickActionInner}>
-                                        <Ionicons name="bar-chart-outline" size={36} color="#fff" />
-                                        <Text style={styles.quickActionText}>Графики</Text>
+                                        <Ionicons name="qr-code-outline" size={34} color="#fff" />
+                                        <Text style={styles.quickActionText}>Сканирай</Text>
                                     </View>
                                 </TouchableOpacity>
                             </View>
 
                             <View style={styles.quickActionsRow}>
-                                <TouchableOpacity style={[styles.quickActionBox, { backgroundColor: '#2196F3' }]} onPress={() => navigation.navigate('QrCardsListScreen')}>
+                                <TouchableOpacity
+                                    style={[styles.quickActionCompact, { backgroundColor: '#4CAF50' }]}
+                                    onPress={() => navigation.navigate('ManualExpenseScreen')}
+                                >
                                     <View style={styles.quickActionInner}>
-                                        <Ionicons name="card-outline" size={48} color="#fff" />
-                                        <Text style={styles.quickActionText}>Карти</Text>
+                                        <Ionicons name="add-circle-outline" size={26} color="#fff" />
+                                        <Text style={styles.quickActionCompactText}>Разход</Text>
                                     </View>
                                 </TouchableOpacity>
 
-                                <TouchableOpacity style={[styles.quickActionBox, { backgroundColor: '#00BCD4' }]} onPress={() => navigation.navigate('Scanner')}>
+                                <TouchableOpacity
+                                    style={[styles.quickActionCompact, { backgroundColor: '#9C27B0' }]}
+                                    onPress={() => navigation.navigate('ShoppingListsScreen')}
+                                >
                                     <View style={styles.quickActionInner}>
-                                        <Ionicons name="qr-code-outline" size={40} color="#fff" />
-                                        <Text style={styles.quickActionText}>Сканирай</Text>
+                                        <Ionicons name="list-outline" size={26} color="#fff" />
+                                        <Text style={styles.quickActionCompactText}>Списъци</Text>
                                     </View>
                                 </TouchableOpacity>
 
-                                <TouchableOpacity style={[styles.quickActionBox, { backgroundColor: '#9C27B0' }]} onPress={() => navigation.navigate('ShoppingListsScreen')}>
+                                <TouchableOpacity
+                                    style={[styles.quickActionCompact, { backgroundColor: '#FF9800' }]}
+                                    onPress={() => navigation.navigate('Charts')}
+                                >
                                     <View style={styles.quickActionInner}>
-                                        <Ionicons name="list-outline" size={40} color="#fff" />
-                                        <Text style={styles.quickActionText}>Списъци</Text>
+                                        <Ionicons name="bar-chart-outline" size={26} color="#fff" />
+                                        <Text style={styles.quickActionCompactText}>Графики</Text>
                                     </View>
                                 </TouchableOpacity>
                             </View>
-
                         </View>
 
 
@@ -579,71 +621,57 @@ const styles = StyleSheet.create({
         flexDirection: 'row',
         justifyContent: 'space-between',
         padding: 10,
-        gap: 10, // ако използваш React Native >= 0.71
-    },
-    quickActionsGrid: {
-        flexDirection: 'row',
-        flexWrap: 'wrap',
-        justifyContent: 'space-between',
-        paddingHorizontal: 16,
-        marginBottom: 30,
-        gap: 12,
-    },
-
-    quickActionBox: {
-        width: '47%',
-        aspectRatio: 1,
-        borderRadius: 20,
-        alignItems: 'center',
-        justifyContent: 'center',
-        flexDirection: 'column',
-        paddingVertical: 16,
-        paddingHorizontal: 0,
-        shadowColor: '#000',
-        shadowOpacity: 0.2,
-        shadowRadius: 6,
-        shadowOffset: { width: 0, height: 3 },
-        elevation: 4,
-    },
-
-
-    quickActionText: {
-        marginTop: 4,  // беше 8
-        fontSize: 14,
-        fontWeight: '600',
-        color: '#fff',
-        textAlign: 'center',
+        gap: 10,
     },
     quickActionsRow: {
         flexDirection: 'row',
         justifyContent: 'space-between',
         paddingHorizontal: 12,
     },
-
-    quickActionBox: {
+    quickActionLarge: {
         flex: 1,
-        height: 120,
+        height: 108,
         marginHorizontal: 4,
-        borderRadius: 12,
+        borderRadius: 14,
         padding: 8,
+        shadowColor: '#000',
+        shadowOpacity: 0.15,
+        shadowRadius: 5,
+        shadowOffset: { width: 0, height: 2 },
+        elevation: 3,
     },
-
+    quickActionCompact: {
+        flex: 1,
+        height: 84,
+        marginHorizontal: 4,
+        borderRadius: 14,
+        padding: 6,
+        shadowColor: '#000',
+        shadowOpacity: 0.12,
+        shadowRadius: 4,
+        shadowOffset: { width: 0, height: 2 },
+        elevation: 2,
+    },
     quickActionInner: {
         flex: 1,
         justifyContent: 'center',
         alignItems: 'center',
     },
-
     quickActionText: {
         color: '#fff',
-        fontSize: 14,
-        fontWeight: '500',
+        fontSize: 15,
+        fontWeight: '600',
+        textAlign: 'center',
+        marginTop: 6,
+    },
+    quickActionCompactText: {
+        color: '#fff',
+        fontSize: 12,
+        fontWeight: '600',
         textAlign: 'center',
         marginTop: 4,
     },
-
     quckActionsWrapper: {
-        marginBottom: 20
-    }
-
+        marginBottom: 20,
+    },
 });

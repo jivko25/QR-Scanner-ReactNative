@@ -8,6 +8,8 @@ import { useAuth } from '../storage/authContext';
 import Toast from 'react-native-toast-message';
 import Ionicons from '@expo/vector-icons/Ionicons';
 import { categoryMeta } from '../utils/storeCategories';
+import { useOffline } from '../storage/offlineContext';
+import OfflineBanner from '../components/OfflineBanner';
 
 export default function ScannerScreen({ navigation }) {
   const [facing, setFacing] = useState('back');
@@ -17,6 +19,7 @@ export default function ScannerScreen({ navigation }) {
   const [modalVisible, setModalVisible] = useState(false);
   const { budgets } = useBudgets();
   const { getSession } = useAuth();
+  const { isOffline } = useOffline();
 
   const [stores, setStores] = useState([]);
   const [selectedStore, setSelectedStore] = useState(null);
@@ -103,6 +106,15 @@ export default function ScannerScreen({ navigation }) {
   };
 
   const sendScannedData = async () => {
+    if (isOffline) {
+      Toast.show({
+        type: 'info',
+        text1: 'Офлайн',
+        text2: 'Записването на бележка изисква интернет.',
+      });
+      return;
+    }
+
     if (!selectedBudget) {
       Toast.show({
         type: 'error',
@@ -167,6 +179,7 @@ export default function ScannerScreen({ navigation }) {
 
   return (
     <View style={styles.container}>
+      <OfflineBanner message="Офлайн — сканирането работи, но записът изисква интернет" />
       {showCamera ? (
         <CameraView
           style={styles.camera}
@@ -261,9 +274,15 @@ export default function ScannerScreen({ navigation }) {
 
             <View style={styles.modalButtons}>
               <Button
-                title={isSendingScan ? "Изпращане..." : "Запази бележката"}
+                title={
+                  isOffline
+                    ? 'Нужен е интернет'
+                    : isSendingScan
+                      ? 'Изпращане...'
+                      : 'Запази бележката'
+                }
                 onPress={sendScannedData}
-                disabled={isSendingScan || !selectedBudget}
+                disabled={isSendingScan || !selectedBudget || isOffline}
               />
               <Button title="Отказ" onPress={restartScan} color="red" />
             </View>

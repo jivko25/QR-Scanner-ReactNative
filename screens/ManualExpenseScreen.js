@@ -17,11 +17,13 @@ import Toast from 'react-native-toast-message';
 import DefaultLayout from '../components/DefaultLayout';
 import Ionicons from '@expo/vector-icons/Ionicons';
 import { categoryMeta } from '../utils/storeCategories';
+import { useOffline } from '../storage/offlineContext';
 
 
 export default function ManualExpenseScreen({ navigation }) {
   const { budgets } = useBudgets();
   const { getSession } = useAuth();
+  const { isOffline } = useOffline();
 
   const [selectedBudget, setSelectedBudget] = useState(null);
   const [stores, setStores] = useState([]);
@@ -84,6 +86,15 @@ export default function ManualExpenseScreen({ navigation }) {
   }, [selectedCategory]);
 
   const submitExpense = async () => {
+    if (isOffline) {
+      Toast.show({
+        type: 'info',
+        text1: 'Офлайн',
+        text2: 'Добавянето на разход изисква интернет.',
+      });
+      return;
+    }
+
     if (!amount || !selectedBudget) {
       Alert.alert('Моля, попълнете всички полета');
       return;
@@ -186,7 +197,11 @@ export default function ManualExpenseScreen({ navigation }) {
         )}
 
         <View style={styles.buttonContainer}>
-          <Button title="Добави разход" onPress={submitExpense} />
+          <Button
+            title={isOffline ? 'Нужен е интернет' : 'Добави разход'}
+            onPress={submitExpense}
+            disabled={isOffline}
+          />
         </View>
       </ScrollView>
     </DefaultLayout>

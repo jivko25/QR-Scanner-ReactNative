@@ -4,6 +4,7 @@ import { Platform, Linking } from 'react-native';
 import AppNavigator from './navigation/AppNavigator';
 import { AuthProvider } from './storage/authContext';
 import { BudgetProvider } from './storage/budgetsContext';
+import { OfflineProvider } from './storage/offlineContext';
 import Toast from 'react-native-toast-message';
 import * as Notifications from 'expo-notifications';
 import * as Device from 'expo-device';
@@ -88,16 +89,18 @@ export default function App() {
     });
 
     return () => {
-      Notifications.removeNotificationSubscription(notificationListener.current);
-      Notifications.removeNotificationSubscription(responseListener.current);
+      notificationListener.current?.remove();
+      responseListener.current?.remove();
     };
   }, []);
 
   return (
     <BudgetProvider>
       <AuthProvider>
-        <AppNavigator />
-        <Toast />
+        <OfflineProvider>
+          <AppNavigator />
+          <Toast />
+        </OfflineProvider>
       </AuthProvider>
     </BudgetProvider>
   );

@@ -1,25 +1,15 @@
-import React, { useEffect, useState } from 'react';
-import { View, Text, Button, ActivityIndicator, TouchableOpacity, ScrollView } from 'react-native';
+import React from 'react';
+import { View, Text } from 'react-native';
 import { useAuth } from '../storage/authContext';
-import { useBudgets } from '../storage/budgetsContext';
 import LottieView from 'lottie-react-native';
 import loadingAnimation from '../assets/loading-animation.json';
 import AuthorizedUserHome from './AuthorizedUserHome';
 import GuestView from './GuestView';
 
 export default function HomeScreen({ navigation }) {
-    const { session, loadSessionFromStorage, loading } = useAuth();
-    const { loading: loadingBudgets } = useBudgets();
+    const { session, loading } = useAuth();
 
-    useEffect(() => {
-        const initialize = async () => {
-            await loadSessionFromStorage();
-            setCheckedSession(true);
-        };
-        initialize();
-    }, []);
-
-    if (loadingBudgets || loading) {
+    if (loading) {
         return (
             <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center', backgroundColor: '#f5f5f5' }}>
                 <LottieView source={loadingAnimation} autoPlay loop style={{ width: 200, height: 200 }} />
@@ -31,12 +21,10 @@ export default function HomeScreen({ navigation }) {
     return (
         <View style={{ flex: 1, justifyContent: 'center', backgroundColor: '#f5f5f5' }}>
             {session?.user ? (
-                <AuthorizedUserHome
-                    navigation={navigation}
-                />
-            ) :
-                (<GuestView navigation={navigation} />)
-            }
+                <AuthorizedUserHome navigation={navigation} />
+            ) : (
+                <GuestView navigation={navigation} />
+            )}
         </View>
     );
 }

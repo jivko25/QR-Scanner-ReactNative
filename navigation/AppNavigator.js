@@ -22,6 +22,8 @@ import SettingsScreen from '../screens/SettingsScreen';
 import BudgetChartScreen from '../screens/BudgetChartScreen';
 import ManualExpenseScreen from '../screens/ManualExpenseScreen';
 import BrochuresListScreen from '../screens/BrouchuresList';
+import BrochureProductsSearchScreen from '../screens/BrochureProductsSearchScreen';
+import BrochureProductDetailScreen from '../screens/BrochureProductDetailScreen';
 import ShoppingListsScreen from '../screens/ShoppingListsScreen';
 import CreateShoppingListScreen from '../screens/CreateShoppingListScreen';
 import ShoppingListDetailScreen from '../screens/ShoppingListDetailScreen';
@@ -134,6 +136,16 @@ export default function AppNavigator() {
         <Stack.Screen
           name="BrochuresListScreen"
           component={BrochuresListScreen}
+          options={{ headerShown: false }}
+        />
+        <Stack.Screen
+          name="BrochureProductsSearchScreen"
+          component={BrochureProductsSearchScreen}
+          options={{ headerShown: false }}
+        />
+        <Stack.Screen
+          name="BrochureProductDetailScreen"
+          component={BrochureProductDetailScreen}
           options={{ headerShown: false }}
         />
         <Stack.Screen

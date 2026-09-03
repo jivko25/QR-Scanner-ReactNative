@@ -55,7 +55,8 @@
             "./assets/duckquack.mp3"
           ]
         }
-      ]
+      ],
+      "@react-native-community/datetimepicker"
     ]
   }
 }

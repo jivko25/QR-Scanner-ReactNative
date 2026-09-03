@@ -1,9 +1,9 @@
-import React, { useEffect, useState } from 'react';
+import React, { useCallback, useState } from 'react';
 import { View, TouchableOpacity, Text, StyleSheet } from 'react-native';
-import { useNavigation, useRoute } from '@react-navigation/native';
+import { useFocusEffect, useNavigation, useRoute } from '@react-navigation/native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { Ionicons } from '@expo/vector-icons';
-import { ALL_TABS } from '../utils/tabs';
+import { resolveTabs } from '../utils/tabs';
 
 const STORAGE_KEY = 'selectedTabs';
 
@@ -12,35 +12,34 @@ export default function BottomNav() {
   const route = useRoute();
   const active = route.name;
 
-  const [tabs, setTabs] = useState([]);
+  const [tabs, setTabs] = useState(() => resolveTabs());
 
-  useEffect(() => {
-    const loadTabs = async () => {
-      try {
-        const saved = await AsyncStorage.getItem(STORAGE_KEY);
-        if (saved) {
-          const selectedTabs = JSON.parse(saved);
-          // Филтрираме всички табове по избраните имена
-          const filtered = ALL_TABS.filter((tab) => selectedTabs.includes(tab.name));
-          if (filtered.length) {
-            setTabs(filtered);
-            return;
+  useFocusEffect(
+    useCallback(() => {
+      let cancelled = false;
+
+      const loadTabs = async () => {
+        try {
+          const saved = await AsyncStorage.getItem(STORAGE_KEY);
+          const selectedNames = saved ? JSON.parse(saved) : null;
+          if (!cancelled) {
+            setTabs(resolveTabs(selectedNames));
+          }
+        } catch (error) {
+          console.log('Грешка при зареждане на табове:', error);
+          if (!cancelled) {
+            setTabs(resolveTabs());
           }
         }
-        // Ако няма запазени настройки, ползваме всички по default
-        setTabs(ALL_TABS);
-      } catch (error) {
-        console.log('Грешка при зареждане на табове:', error);
-        setTabs(ALL_TABS);
-      }
-    };
+      };
 
-    loadTabs();
-  }, []);
+      loadTabs();
 
-  if (tabs.length === 0) {
-    return null; // или loader
-  }
+      return () => {
+        cancelled = true;
+      };
+    }, [])
+  );
 
   return (
     <View style={styles.container}>
@@ -55,7 +54,10 @@ export default function BottomNav() {
             size={22}
             color={active === tab.name ? '#007aff' : '#888'}
           />
-          <Text style={[styles.label, active === tab.name && styles.activeLabel]}>
+          <Text
+            style={[styles.label, active === tab.name && styles.activeLabel]}
+            numberOfLines={1}
+          >
             {tab.label}
           </Text>
         </TouchableOpacity>
@@ -70,16 +72,21 @@ const styles = StyleSheet.create({
     borderTopWidth: 1,
     borderColor: '#ccc',
     paddingVertical: 6,
+    paddingHorizontal: 4,
     backgroundColor: '#fff',
     justifyContent: 'space-around',
-  },
-  tab: {
     alignItems: 'center',
   },
+  tab: {
+    flex: 1,
+    alignItems: 'center',
+    paddingHorizontal: 2,
+  },
   label: {
-    fontSize: 12,
+    fontSize: 11,
     color: '#888',
     marginTop: 2,
+    textAlign: 'center',
   },
   activeLabel: {
     color: '#007aff',
