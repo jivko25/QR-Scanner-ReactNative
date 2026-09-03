@@ -10,6 +10,7 @@ import { getColorByIndex } from '../utils/getColor';
 import Toast from 'react-native-toast-message';
 import DefaultLayout from '../components/DefaultLayout'
 import { categoryMeta } from '../utils/storeCategories';
+import StepGuide from '../components/StepGuide';
 
 export default function HomeScreen({ navigation }) {
     const { session, loadSessionFromStorage, clearSession, loading, displayName } = useAuth();
@@ -117,6 +118,12 @@ export default function HomeScreen({ navigation }) {
             </View>
         );
     }
+
+    // return (
+    //     <StepGuide onFinish={() => {
+    //         console.log('finish');
+    //     }} />
+    // )
 
     return (
         <DefaultLayout>
